@@ -1,1 +1,5 @@
-/* Insira os Pages Aqui */
+import Login from "./LoginPage";
+
+export {
+    Login
+}

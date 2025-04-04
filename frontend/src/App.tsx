@@ -1,8 +1,9 @@
-import RoutesApp from "./routes";
+import { Login } from "./pages";
+
 
 function App() {
   return (
-      <RoutesApp />
+      <Login />
   );
 }
 
