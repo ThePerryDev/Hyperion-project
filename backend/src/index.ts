@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connect } from "./database/connection";
 import routes from "./routes";
+import Stac_Api from "./routes/Stac_Api";
 
 dotenv.config();
 
@@ -21,3 +22,5 @@ app.listen(PORT, () => {
 });
 
 app.use(routes);
+
+app.use('/stac', Stac_Api);
