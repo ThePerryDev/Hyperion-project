@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { exportIcon, mapIcon, naoSeiIcon, settings } from "../../assets";
+import { exportIcon, mapIcon, settings } from "../../assets";
+import { useState } from "react";
 
 const NavBar = styled.div`
   position: absolute;
@@ -42,25 +43,55 @@ const NavButton = styled.button`
 `;
 
 const Bottom = styled.div`
-  position: absolute; /* Coloca o Bottom na parte inferior da NavBar */
-  bottom: 0.75rem; /* Distância do fundo */
+  position: absolute;
+  bottom: 0.75rem;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Garante que os botões do Bottom fiquem centralizados */
+  align-items: center;
+`;
+
+const FilterPanel = styled.div`
+  position: absolute;
+  top: 0;
+  left: -16vw;
+  width: 280px;
+  height: 100%;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 12px 0px 0px 12px;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  z-index: 1500;
 `;
 
 export default function NavigationBar() {
+  const [showFilter, setShowFilter] = useState(false);
+
   return (
     <NavBar>
+      {showFilter && (
+        <FilterPanel>
+          <h3>Filtros</h3>
+          <div>
+            <label>Data Início</label>
+            <input type="date" />
+          </div>
+          <div>
+            <label>Data Fim</label>
+            <input type="date" />
+          </div>
+          <button>Aplicar Filtros</button>
+        </FilterPanel>
+      )}
+
       <Top>
-        <NavButton title="Location">
-          <img src={mapIcon} alt="Location" />
+        <NavButton
+          title="Filter"
+          onClick={() => setShowFilter((prev) => !prev)}
+        >
+          <img src={mapIcon} alt="Filter" />
         </NavButton>
         <NavButton title="Export">
           <img src={exportIcon} alt="Export" />
-        </NavButton>
-        <NavButton title="naoSei">
-          <img src={naoSeiIcon} alt="naoSei" />
         </NavButton>
       </Top>
       <Bottom>
