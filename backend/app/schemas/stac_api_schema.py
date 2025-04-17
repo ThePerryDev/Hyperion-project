@@ -6,17 +6,15 @@ class STACRequest(BaseModel):
     data_inicio: str
     data_fim: str
     colecao: str
-    filtrar_nuvens: Optional[bool] = False  # novo campo para ativar filtro opcional
+    filtrar_nuvens: Optional[bool] = False
 
-class STACItem(BaseModel):
+class STACImagemFiltrada(BaseModel):
     id: str
-    type: str
-    geometry: dict
-    properties: dict
-    assets: dict
-    links: list
     bbox: List[float]
-    collection: str
+    data_inicio: str
+    data_fim: str
+    url_imagem: str
+    url_cmask: Optional[str]
 
 class ColecaoSTAC(BaseModel):
     id: str

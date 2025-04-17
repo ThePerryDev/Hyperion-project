@@ -3,8 +3,6 @@ from pystac_client import Client
 from app.schemas.stac_api_schema import STACRequest
 
 STAC_BASE_URL = "https://data.inpe.br/bdc/stac/v1"
-
-# Palavras-chave que devem estar no ID da coleção para ser considerada válida
 WFI_KEYWORDS = ["WFI", "wfi", "WFM", "wfm"]
 
 def buscar_imagens_stac(params: STACRequest):
@@ -26,22 +24,32 @@ def buscar_imagens_stac(params: STACRequest):
         propriedades = item.properties
         cloud_cover = propriedades.get("eo:cloud_cover")
 
-        # 🌥️ Aplica o filtro de nuvens se solicitado
-        if params.filtrar_nuvens:
-            if cloud_cover is None:
-                cloud_cover = 100.0  # assume 100% de nuvem se metadado estiver ausente
-            if cloud_cover > 10:
-                continue
-
-        asset = (
-            item.assets.get("BAND15")
-            or item.assets.get("BAND16")
-            or item.assets.get("BAND14")
-        )
-        if not asset:
+        # Aplica o filtro SOMENTE se for solicitado
+        if params.filtrar_nuvens and (cloud_cover is None or cloud_cover > 10):
             continue
 
-        resultados.append(item.to_dict())
+        assets = item.assets
+        band13 = assets.get("BAND13")
+        band14 = assets.get("BAND14")
+        band15 = assets.get("BAND15")
+        band16 = assets.get("BAND16")
+        cmask = assets.get("CMASK")
+        thumbnail = assets.get("thumbnail")
+
+        resultados.append({
+            "id": item.id,
+            "data": propriedades.get("datetime", "")[:10],
+            "bbox": item.bbox,
+            "bandas": {
+                "BAND13": band13.href if band13 else None,
+                "BAND14": band14.href if band14 else None,
+                "BAND15": band15.href if band15 else None,
+                "BAND16": band16.href if band16 else None,
+            },
+            "cmask": cmask.href if cmask else None,
+            "thumbnail": thumbnail.href if thumbnail else None,
+            "cobertura_nuvem": cloud_cover,
+        })
 
     return resultados
 

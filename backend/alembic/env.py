@@ -19,7 +19,7 @@ config.set_main_option(
 )
 
 # 🎯 Importa os modelos
-from app.database import Base
+from app.core.database import Base
 from app.models.queimadas import CicatrizQueimada  # ou o nome dos seus modelos
 
 # 📌 Define a metadata para gerar migrations automaticamente
