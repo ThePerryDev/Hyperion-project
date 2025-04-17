@@ -1,7 +1,14 @@
 import styled from "styled-components";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  useMapEvents,
+  Polygon,
+  Marker,
+} from "react-leaflet";
 import { useState } from "react";
+import L from "leaflet";
 
 const PageContainer = styled.div`
   height: 92vh;
@@ -26,7 +33,62 @@ const MapWrapper = styled.div`
   }
 `;
 
+const ClearButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: #fe5000;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 999;
+
+  &:hover {
+    background-color: #e24600;
+  }
+`;
+
+// 🔹 Ícone minimalista pequeno (pode trocar a URL depois)
+const minimalIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconSize: [18, 28], // menor que o padrão
+  iconAnchor: [9, 28],
+  popupAnchor: [0, -28],
+  shadowUrl: "",
+});
+
+function MapClickHandler({
+  onClick,
+}: {
+  onClick: (latlng: [number, number]) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      onClick([lat, lng]);
+    },
+  });
+  return null;
+}
+
 export default function Home() {
+  const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+
+  const handleMapClick = (coords: [number, number]) => {
+    setPolygonPoints((prev) => {
+      if (prev.length >= 4) return prev;
+      const updated = [...prev, coords];
+      console.log("Coordenadas atuais do polígono:", updated);
+      return updated;
+    });
+  };
+
+  const clearPolygon = () => {
+    setPolygonPoints([]);
+  };
+
   return (
     <PageContainer>
       <MapWrapper>
@@ -35,16 +97,21 @@ export default function Home() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapClickHandler onClick={handleMapClick} />
+          {polygonPoints.map((point, index) => (
+            <Marker key={index} position={point} icon={minimalIcon} />
+          ))}
+          {polygonPoints.length > 2 && (
+            <Polygon
+              positions={polygonPoints}
+              pathOptions={{ color: "lime" }}
+            />
+          )}
         </MapContainer>
+        {polygonPoints.length > 0 && (
+          <ClearButton onClick={clearPolygon}>Limpar Polígono</ClearButton>
+        )}
       </MapWrapper>
     </PageContainer>
   );
 }
-
-/*      
-  <NavBar>
-    <NavBarButton title="Icon 1">📁</NavBarButton>
-    <NavBarButton title="Icon 2">📍</NavBarButton>
-    <NavBarButton title="Icon 3">⚙️</NavBarButton>
-  </NavBar>
-*/

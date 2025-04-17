@@ -1,5 +1,13 @@
 import styled from "styled-components";
-import { exportIcon, mapIcon, settings } from "../../assets";
+import {
+  exportIcon,
+  mapIcon,
+  opemMapIcon,
+  openExportIcon,
+  returnIcon,
+  searchIcon,
+  settings,
+} from "../../assets";
 import { useState } from "react";
 
 const NavBar = styled.div`
@@ -53,7 +61,7 @@ const Bottom = styled.div`
 const FilterPanel = styled.div`
   position: absolute;
   top: 0;
-  left: -16vw;
+  right: 100%;
   width: 280px;
   height: 100%;
   background-color: #f9f9f9;
@@ -61,42 +69,250 @@ const FilterPanel = styled.div`
   border-radius: 12px 0px 0px 12px;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   z-index: 1500;
+  gap: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: width 0.3s ease;
+
+  @media (max-width: 1024px) {
+    width: 320px;
+  }
+
+  @media (max-width: 768px) {
+    width: 80vw;
+    border-radius: 0px;
+    right: 0;
+  }
+
+  @media (max-width: 480px) {
+    width: 100vw;
+    height: 100vh;
+    padding-top: 2rem;
+    border-radius: 0px;
+    right: 0;
+  }
+`;
+
+const CloseButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  cursor: pointer;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const SearchIcon = styled.img`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+`;
+
+const InputCustom = styled.input`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #d9d9d9;
+`;
+
+const InputCustom2 = styled.input`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #d9d9d9;
+  padding-left: 12px;
+`;
+
+const InputWithIcon = styled(InputCustom)`
+  padding-left: 40px;
+`;
+
+const ButtonCustom = styled.button`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #fe5000;
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: #e24600;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+const SelectCustom = styled.select`
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #d9d9d9;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px;
+  cursor: pointer;
+`;
+
+const OptionDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Options = styled.label`
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 1px;
 `;
 
 export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   return (
     <NavBar>
       {showFilter && (
         <FilterPanel>
-          <h3>Filtros</h3>
-          <div>
-            <label>Data Início</label>
-            <input type="date" />
-          </div>
-          <div>
-            <label>Data Fim</label>
-            <input type="date" />
-          </div>
-          <button>Aplicar Filtros</button>
+          <CloseButton onClick={() => setShowFilter(false)}>
+            <img src={returnIcon} alt="Voltar" />
+          </CloseButton>
+          <h3>Localizar</h3>
+          <InputWrapper>
+            <SearchIcon src={searchIcon} alt="Buscar" />
+            <InputWithIcon type="text" placeholder="Buscar..." />
+          </InputWrapper>
+          <ButtonCustom>Selecionar Área</ButtonCustom>
+          <OptionDiv>
+            <Options>Coleção Satelite</Options>
+            <SelectCustom defaultValue="">
+              <option value="" disabled hidden>
+                Selecione...
+              </option>
+              <option value="sentinel">placeholder</option>
+            </SelectCustom>
+          </OptionDiv>
+          <OptionDiv>
+            <Options>Data Início (UTC)</Options>
+            <InputCustom type="date" />
+          </OptionDiv>
+          <OptionDiv>
+            <Options>Data Fim (UTC)</Options>
+            <InputCustom type="date" />
+          </OptionDiv>
         </FilterPanel>
       )}
-
+      {showExport && (
+        <FilterPanel>
+          <CloseButton onClick={() => setShowFilter(false)}>
+            <img src={returnIcon} alt="Fechar" />
+          </CloseButton>
+          <h3>Localizar</h3>
+          <InputWrapper>
+            <SearchIcon src={searchIcon} alt="Buscar" />
+            <InputWithIcon type="text" placeholder="Buscar..." />
+          </InputWrapper>
+          <OptionDiv>
+            <InputCustom2 placeholder="Limite Esquerdo Inferior" />
+          </OptionDiv>
+          <OptionDiv>
+            <InputCustom2 placeholder="Limite Esquerdo Superior" />
+          </OptionDiv>
+          <OptionDiv>
+            <InputCustom2 placeholder="Limite Direito Superior" />
+          </OptionDiv>
+          <OptionDiv>
+            <InputCustom2 placeholder="Limite Direito Inferior" />
+          </OptionDiv>
+          <OptionDiv>
+            <Options>Coleção (Satélite)</Options>
+            <SelectCustom defaultValue="">
+              <option value="" disabled hidden>
+                Selecione...
+              </option>
+              <option value="sentinel">placeholder</option>
+            </SelectCustom>
+          </OptionDiv>
+          <OptionDiv>
+            <Options>Data Início (UTC)</Options>
+            <InputCustom type="date" />
+          </OptionDiv>
+          <OptionDiv>
+            <Options>Data Fim (UTC)</Options>
+            <InputCustom type="date" />
+          </OptionDiv>
+          <ButtonCustom>Exportar Dados</ButtonCustom>
+        </FilterPanel>
+      )}
       <Top>
         <NavButton
-          title="Filter"
-          onClick={() => setShowFilter((prev) => !prev)}
+          title="Filtro"
+          onClick={() => {
+            setShowFilter((prev) => {
+              if (!prev) setShowExport(false);
+              return !prev;
+            });
+          }}
         >
-          <img src={mapIcon} alt="Filter" />
+          <img src={showFilter ? opemMapIcon : mapIcon} alt="Filter" />
         </NavButton>
-        <NavButton title="Export">
-          <img src={exportIcon} alt="Export" />
+        <NavButton
+          title="Exportar"
+          onClick={() => {
+            setShowExport((prev) => {
+              if (!prev) setShowFilter(false);
+              return !prev;
+            });
+          }}
+        >
+          <img src={showExport ? openExportIcon : exportIcon} alt="Export" />
         </NavButton>
       </Top>
       <Bottom>
         <NavButton title="Settings">
-          <img src={settings} alt="Settings" />
+          <img src={settings} alt="Configurações" />
         </NavButton>
       </Bottom>
     </NavBar>

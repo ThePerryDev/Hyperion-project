@@ -14,6 +14,8 @@ function App() {
   const GlobalStyle = createGlobalStyle`
 * {
   box-sizing: border-box;
+  @import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;700&display=swap");
+  font-family: "Jost", sans-serif;
 }
 
 html, body, #root {
