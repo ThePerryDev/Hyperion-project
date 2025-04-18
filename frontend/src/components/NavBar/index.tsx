@@ -69,10 +69,8 @@ const FilterPanel = styled.div`
   border-radius: 12px 0px 0px 12px;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   z-index: 1500;
-  gap: 22px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   transition: width 0.3s ease;
 
   @media (max-width: 1024px) {
@@ -93,6 +91,32 @@ const FilterPanel = styled.div`
     right: 0;
   }
 `;
+
+const ScrollContainer = styled.div`
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-items: center;
+  padding-bottom: 1rem;
+  padding-right: 1rem; /* ADICIONADO: espaço da direita */
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #c0c0c0;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
+
 
 const CloseButton = styled.button`
   display: none;
@@ -219,71 +243,75 @@ export default function NavigationBar() {
           <CloseButton onClick={() => setShowFilter(false)}>
             <img src={returnIcon} alt="Voltar" />
           </CloseButton>
-          <h3>Localizar</h3>
-          <InputWrapper>
-            <SearchIcon src={searchIcon} alt="Buscar" />
-            <InputWithIcon type="text" placeholder="Buscar..." />
-          </InputWrapper>
-          <ButtonCustom>Selecionar Área</ButtonCustom>
-          <OptionDiv>
-            <Options>Coleção Satelite</Options>
-            <SelectCustom defaultValue="">
-              <option value="" disabled hidden>
-                Selecione...
-              </option>
-              <option value="sentinel">placeholder</option>
-            </SelectCustom>
-          </OptionDiv>
-          <OptionDiv>
-            <Options>Data Início (UTC)</Options>
-            <InputCustom type="date" />
-          </OptionDiv>
-          <OptionDiv>
-            <Options>Data Fim (UTC)</Options>
-            <InputCustom type="date" />
-          </OptionDiv>
+          <ScrollContainer>
+            <h3>Localizar</h3>
+            <InputWrapper>
+              <SearchIcon src={searchIcon} alt="Buscar" />
+              <InputWithIcon type="text" placeholder="Buscar..." />
+            </InputWrapper>
+            <ButtonCustom>Selecionar Área</ButtonCustom>
+            <OptionDiv>
+              <Options>Coleção Satelite</Options>
+              <SelectCustom defaultValue="">
+                <option value="" disabled hidden>
+                  Selecione...
+                </option>
+                <option value="sentinel">placeholder</option>
+              </SelectCustom>
+            </OptionDiv>
+            <OptionDiv>
+              <Options>Data Início (UTC)</Options>
+              <InputCustom type="date" />
+            </OptionDiv>
+            <OptionDiv>
+              <Options>Data Fim (UTC)</Options>
+              <InputCustom type="date" />
+            </OptionDiv>
+          </ScrollContainer>
         </FilterPanel>
       )}
       {showExport && (
         <FilterPanel>
-          <CloseButton onClick={() => setShowFilter(false)}>
+          <CloseButton onClick={() => setShowExport(false)}>
             <img src={returnIcon} alt="Fechar" />
           </CloseButton>
-          <h3>Localizar</h3>
-          <InputWrapper>
-            <SearchIcon src={searchIcon} alt="Buscar" />
-            <InputWithIcon type="text" placeholder="Buscar..." />
-          </InputWrapper>
-          <OptionDiv>
-            <InputCustom2 placeholder="Limite Esquerdo Inferior" />
-          </OptionDiv>
-          <OptionDiv>
-            <InputCustom2 placeholder="Limite Esquerdo Superior" />
-          </OptionDiv>
-          <OptionDiv>
-            <InputCustom2 placeholder="Limite Direito Superior" />
-          </OptionDiv>
-          <OptionDiv>
-            <InputCustom2 placeholder="Limite Direito Inferior" />
-          </OptionDiv>
-          <OptionDiv>
-            <Options>Coleção (Satélite)</Options>
-            <SelectCustom defaultValue="">
-              <option value="" disabled hidden>
-                Selecione...
-              </option>
-              <option value="sentinel">placeholder</option>
-            </SelectCustom>
-          </OptionDiv>
-          <OptionDiv>
-            <Options>Data Início (UTC)</Options>
-            <InputCustom type="date" />
-          </OptionDiv>
-          <OptionDiv>
-            <Options>Data Fim (UTC)</Options>
-            <InputCustom type="date" />
-          </OptionDiv>
-          <ButtonCustom>Exportar Dados</ButtonCustom>
+          <ScrollContainer>
+            <h3>Exportar</h3>
+            <InputWrapper>
+              <SearchIcon src={searchIcon} alt="Buscar" />
+              <InputWithIcon type="text" placeholder="Buscar..." />
+            </InputWrapper>
+            <OptionDiv>
+              <InputCustom2 placeholder="Limite Esquerdo Inferior" />
+            </OptionDiv>
+            <OptionDiv>
+              <InputCustom2 placeholder="Limite Esquerdo Superior" />
+            </OptionDiv>
+            <OptionDiv>
+              <InputCustom2 placeholder="Limite Direito Superior" />
+            </OptionDiv>
+            <OptionDiv>
+              <InputCustom2 placeholder="Limite Direito Inferior" />
+            </OptionDiv>
+            <OptionDiv>
+              <Options>Coleção (Satélite)</Options>
+              <SelectCustom defaultValue="">
+                <option value="" disabled hidden>
+                  Selecione...
+                </option>
+                <option value="sentinel">placeholder</option>
+              </SelectCustom>
+            </OptionDiv>
+            <OptionDiv>
+              <Options>Data Início (UTC)</Options>
+              <InputCustom type="date" />
+            </OptionDiv>
+            <OptionDiv>
+              <Options>Data Fim (UTC)</Options>
+              <InputCustom type="date" />
+            </OptionDiv>
+            <ButtonCustom>Exportar Dados</ButtonCustom>
+          </ScrollContainer>
         </FilterPanel>
       )}
       <Top>
