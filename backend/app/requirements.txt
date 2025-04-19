@@ -8,3 +8,6 @@ geoalchemy2
 asyncpg
 alembic
 python-dotenv
+pydantic
+typing
+dotenv
