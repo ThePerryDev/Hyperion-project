@@ -7,9 +7,13 @@ import {
   returnIcon,
   searchIcon,
   settings,
+  openSettingsIcon,
+  eyeCloseIcon,
+  eyeOpenIcon,
 } from "../../assets";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+// Estilos (mesmo que você enviou, sem alterações)
 const NavBar = styled.div`
   position: absolute;
   right: 0rem;
@@ -101,7 +105,7 @@ const ScrollContainer = styled.div`
   gap: 22px;
   align-items: center;
   padding-bottom: 1rem;
-  padding-right: 1rem; /* ADICIONADO: espaço da direita */
+  padding-right: 1rem;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -116,7 +120,6 @@ const ScrollContainer = styled.div`
     background-color: transparent;
   }
 `;
-
 
 const CloseButton = styled.button`
   display: none;
@@ -163,6 +166,17 @@ const InputCustom = styled.input`
 `;
 
 const InputCustom2 = styled.input`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #d9d9d9;
+  padding-left: 12px;
+`;
+
+const InputUser = styled.input`
   width: 100%;
   padding: 8px;
   border: none;
@@ -232,9 +246,66 @@ const Options = styled.label`
   letter-spacing: 1px;
 `;
 
+const EyeButton = styled.button`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
 export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (showFilter || showExport || showSettings) {
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showFilter, showExport, showSettings]);
+
+  const [user, setUser] = useState({
+    name: "",
+    role: "",
+    email: "",
+    password: "",
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (showSettings) {
+      setIsLoading(true);
+      setTimeout(() => {
+        // Simulando carregamento de usuário mockado
+        setUser({
+          name: "Ana Souza",
+          role: "admin", // mude para "user" para testar não-admin
+          email: "ana.souza@email.com",
+          password: "123456",
+        });
+        setIsLoading(false);
+      }, 1500);
+    }
+  }, [showSettings]);
 
   return (
     <NavBar>
@@ -314,12 +385,74 @@ export default function NavigationBar() {
           </ScrollContainer>
         </FilterPanel>
       )}
+      {showSettings && (
+        <FilterPanel>
+          <CloseButton onClick={() => setShowSettings(false)}>
+            <img src={returnIcon} alt="Fechar" />
+          </CloseButton>
+          <ScrollContainer>
+            {isLoading ? (
+              <p>Carregando...</p>
+            ) : (
+              <>
+                <OptionDiv>
+                  <Options>Nome do funcionário</Options>
+                  <InputUser
+                    value={user.name}
+                    readOnly={user.role !== "admin"}
+                  />
+                </OptionDiv>
+                <OptionDiv>
+                  <Options>Cargo</Options>
+                  <InputUser value={user.role} readOnly />
+                </OptionDiv>
+                <OptionDiv>
+                  <Options>Email</Options>
+                  <InputUser
+                    value={user.email}
+                    readOnly={user.role !== "admin"}
+                  />
+                </OptionDiv>
+
+                <OptionDiv>
+                  <Options>Senha</Options>
+                  <InputWrapper>
+                    <EyeButton onClick={togglePasswordVisibility}>
+                      <img
+                        src={showPassword ? eyeOpenIcon : eyeCloseIcon}
+                        alt="Mostrar senha"
+                      />
+                    </EyeButton>
+
+                    <InputUser
+                      type={showPassword ? "text" : "password"}
+                      value={user.password}
+                      readOnly={user.role !== "admin"}
+                    />
+                  </InputWrapper>
+                </OptionDiv>
+
+                {user.role === "admin" && (
+                  <>
+                    <ButtonCustom> Cadastrar Usuários </ButtonCustom>
+                    <ButtonCustom> Editar usuários </ButtonCustom>
+                  </>
+                )}
+              </>
+            )}
+          </ScrollContainer>
+        </FilterPanel>
+      )}
+
       <Top>
         <NavButton
           title="Filtro"
           onClick={() => {
             setShowFilter((prev) => {
-              if (!prev) setShowExport(false);
+              if (!prev) {
+                setShowExport(false);
+                setShowSettings(false);
+              }
               return !prev;
             });
           }}
@@ -330,7 +463,10 @@ export default function NavigationBar() {
           title="Exportar"
           onClick={() => {
             setShowExport((prev) => {
-              if (!prev) setShowFilter(false);
+              if (!prev) {
+                setShowFilter(false);
+                setShowSettings(false);
+              }
               return !prev;
             });
           }}
@@ -339,8 +475,22 @@ export default function NavigationBar() {
         </NavButton>
       </Top>
       <Bottom>
-        <NavButton title="Settings">
-          <img src={settings} alt="Configurações" />
+        <NavButton
+          title="Settings"
+          onClick={() => {
+            setShowSettings((prev) => {
+              if (!prev) {
+                setShowFilter(false);
+                setShowExport(false);
+              }
+              return !prev;
+            });
+          }}
+        >
+          <img
+            src={showSettings ? openSettingsIcon : settings}
+            alt="Configurações"
+          />
         </NavButton>
       </Bottom>
     </NavBar>
