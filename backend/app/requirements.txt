@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pystac-client
+rasterio
+numpy
+sqlalchemy
+geoalchemy2
+asyncpg
+alembic
+python-dotenv
+pydantic
+typing
+dotenv
