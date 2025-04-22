@@ -5,19 +5,21 @@ from app.schemas.download_schema import DownloadRequest
 
 router = APIRouter()
 
-# 🔁 Endpoint original: uso com POST (via ThunderClient ou frontend)
+# ✅ Endpoint oficial de download (POST) - usado pelo frontend ou ThunderClient
 @router.post("/baixar")
 def baixar_arquivo_stac(info: DownloadRequest):
+    # Chamando a função que faz o download e cria o arquivo zip
     zip_path = baixar_e_compactar_bandas(
         id=info.id,
         bandas=info.bandas,
         cmask=info.cmask,
         thumbnail=info.thumbnail
     )
+    
+    # Retornando o arquivo zip como resposta
     return FileResponse(zip_path, filename=f"{info.id}.zip", media_type="application/zip")
 
-
-# ✅ Novo endpoint de teste: uso com GET no navegador
+# 🧪 Endpoint de teste (GET) - acessável direto no navegador
 @router.get("/baixar-teste")
 def baixar_teste():
     id = "CBERS_4A_WFI_20230801_219_124"
@@ -33,26 +35,3 @@ def baixar_teste():
     zip_path = baixar_e_compactar_bandas(id=id, bandas=bandas, cmask=cmask, thumbnail=thumbnail)
 
     return FileResponse(zip_path, filename=f"{id}.zip", media_type="application/zip")
-
-
-'''
-from fastapi import APIRouter
-from fastapi.responses import FileResponse
-from app.utils.download_utils import baixar_e_compactar_bandas
-from app.schemas.download_schema import DownloadRequest
-
-router = APIRouter()
-
-@router.post("/baixar")
-def baixar_arquivo_stac(info: DownloadRequest):
-    zip_path = baixar_e_compactar_bandas(
-        id=info.id,
-        bandas=info.bandas,
-        cmask=info.cmask,
-        thumbnail=info.thumbnail
-    )
-    return FileResponse(zip_path, filename=f"{info.id}.zip", media_type="application/zip")
-
-
-
-'''

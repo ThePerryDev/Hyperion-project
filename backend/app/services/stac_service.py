@@ -1,6 +1,7 @@
 import requests
 from pystac_client import Client
 from app.schemas.stac_api_schema import STACRequest
+from datetime import datetime  # <- Adicionado
 
 STAC_BASE_URL = "https://data.inpe.br/bdc/stac/v1"
 WFI_KEYWORDS = ["WFI", "wfi", "WFM", "wfm"]
@@ -36,9 +37,13 @@ def buscar_imagens_stac(params: STACRequest):
         cmask = assets.get("CMASK")
         thumbnail = assets.get("thumbnail")
 
+        # Converte string para datetime.date
+        data_str = propriedades.get("datetime", "")[:10]
+        data_formatada = datetime.strptime(data_str, "%Y-%m-%d").date() if data_str else None
+
         resultados.append({
             "id": item.id,
-            "data": propriedades.get("datetime", "")[:10],
+            "data": data_formatada,
             "bbox": item.bbox,
             "bandas": {
                 "BAND13": band13.href if band13 else None,

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Body
 from typing import List, Dict, Optional
 import os
+from fastapi.responses import FileResponse
 from app.schemas.stac_api_schema import STACRequest, ColecaoSTAC, STACImagemFiltrada
 from app.controllers.stac_api_controller import buscar_imagens, listar_colecoes
 from app.utils.download_utils import baixar_e_compactar_bandas
@@ -8,8 +9,13 @@ from app.utils.download_utils import baixar_e_compactar_bandas
 router = APIRouter()
 
 @router.post("/buscar-imagens")
-def buscar(params: STACRequest):
-    return buscar_imagens(params)
+async def buscar(params: STACRequest):
+    """
+    Rota para buscar imagens e persistir as consultas no banco de dados.
+    """
+    return await buscar_imagens(params)
+
+
 
 @router.get("/colecoes-suportadas", response_model=List[ColecaoSTAC])
 def colecoes():
