@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+import os
 import requests
 import zipfile
-import os
 
 router = APIRouter()
 
@@ -56,4 +56,3 @@ def baixar_e_compactar_bandas(id: str, bandas: dict, cmask: str, thumbnail: str)
         os.rmdir(root)
 
     return zip_path
-

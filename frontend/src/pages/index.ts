@@ -1,1 +1,3 @@
-/* Insira os Pages Aqui */
+import Home from "./Home";
+
+export { Home };

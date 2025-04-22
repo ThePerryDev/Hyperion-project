@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Body
 from typing import List, Dict, Optional
 import os
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 from fastapi.responses import FileResponse
 from app.schemas.stac_api_schema import STACRequest, ColecaoSTAC, STACImagemFiltrada
 from app.controllers.stac_api_controller import buscar_imagens, listar_colecoes
