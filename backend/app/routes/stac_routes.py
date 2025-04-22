@@ -5,10 +5,7 @@ from app.schemas.download_schema import DownloadRequest
 
 router = APIRouter()
 
-<<<<<<< HEAD
-=======
 # ✅ Endpoint oficial de download (POST) - usado pelo frontend ou ThunderClient
->>>>>>> master
 @router.post("/baixar")
 def baixar_arquivo_stac(info: DownloadRequest):
     # Chamando a função que faz o download e cria o arquivo zip
@@ -21,8 +18,6 @@ def baixar_arquivo_stac(info: DownloadRequest):
     
     # Retornando o arquivo zip como resposta
     return FileResponse(zip_path, filename=f"{info.id}.zip", media_type="application/zip")
-<<<<<<< HEAD
-=======
 
 # 🧪 Endpoint de teste (GET) - acessável direto no navegador
 @router.get("/baixar-teste")
@@ -40,4 +35,3 @@ def baixar_teste():
     zip_path = baixar_e_compactar_bandas(id=id, bandas=bandas, cmask=cmask, thumbnail=thumbnail)
 
     return FileResponse(zip_path, filename=f"{id}.zip", media_type="application/zip")
->>>>>>> master

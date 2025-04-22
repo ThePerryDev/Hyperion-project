@@ -185,7 +185,9 @@ const InputUser = styled.input`
   font-size: 18px;
   background-color: #d9d9d9;
   padding-left: 12px;
+  padding-right: 40px;
 `;
+
 
 const InputWithIcon = styled(InputCustom)`
   padding-left: 40px;
@@ -248,7 +250,7 @@ const Options = styled.label`
 
 const EyeButton = styled.button`
   position: absolute;
-  left: 12px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
