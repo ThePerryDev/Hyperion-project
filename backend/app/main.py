@@ -1,5 +1,23 @@
 from fastapi import FastAPI
 from app.routes.api import router as api_router
+<<<<<<< HEAD
+from app.routes import stac_routes 
+
+from app.schemas.tb_consulta import create_tables
+
+app = FastAPI(title="Monitoramento de Queimadas")
+
+app.include_router(api_router)
+
+app.include_router(stac_routes.router, prefix="/stac")
+
+
+# Função que será chamada na inicialização do FastAPI
+@app.on_event("startup")
+async def startup():
+    # Chama a função para criar as tabelas assim que o servidor iniciar
+    await create_tables()
+=======
 from app.routes import stac_routes
 from app.core.database import engine, Base
 from app.routes.usuario_route import router as usuario_router
@@ -28,3 +46,4 @@ app.include_router(stac_routes.router, prefix="/stac")
 
 # Rota do usuário (API v1)
 app.include_router(usuario_router, prefix="/api/v1")
+>>>>>>> master
