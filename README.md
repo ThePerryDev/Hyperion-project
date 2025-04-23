@@ -30,37 +30,37 @@ Para rodar o backend localmente, siga os passos abaixo. Certifique-se de ter o [
 
 ### 🚀 Passo a Passo para Execução do Backend
 
-#### 1. Acesse a pasta `backend`:
+1. Acesse a pasta `backend`:
 
 ```bash
 cd backend
 ```
 
-#### 1. Crie e ative o ambiente virtual:
+2. Crie e ative o ambiente virtual:
 
 ```bash
 py -m venv ../venv
 ../venv/Scripts/activate
 ```
 
-#### 3. Instale as dependências (estando na pasta `backend`):
+3. Instale as dependências (estando na pasta `backend`):
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 4. Faça o mesmo na pasta app (estando na pasta `backend`):
+4. Faça o mesmo na pasta app (estando na pasta `backend`):
 
 ```bash
 cd app
 pip install -r requirements.txt
 ```
 
-#### 5. Configure o banco de dados manualmente no PostgreSQL.
+5. Configure o banco de dados manualmente no PostgreSQL.
 
 Crie um banco com o nome `Hyperion`.
 
-#### 6. Edite o arquivo `.env` com as configurações de seu POSTGRES:
+6. Edite o arquivo `.env` com as configurações de seu POSTGRES:
 
 ```
 POSTGRES_USER=postgres
@@ -70,7 +70,7 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 ```
 
-#### 7. Inicie o servidor FastAPI (estando na pasta `backend`):
+7. Inicie o servidor FastAPI (estando na pasta `backend`):
 
 ```bash
 cd..
