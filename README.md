@@ -28,7 +28,7 @@ Para rodar o backend localmente, siga os passos abaixo. Certifique-se de ter o [
 
 > ⚠️ **Importante:** Por enquanto, é necessário criar manualmente o banco de dados no PostgreSQL antes de iniciar a aplicação.
 
-### 🚀 Passo a Passo para Execução
+### 🚀 Passo a Passo para Execução do Backend
 
 #### 1. Acesse a pasta `backend`:
 
