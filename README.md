@@ -22,6 +22,63 @@ Para clonar o repositório do projeto em sua máquina local, siga os passos abai
 git clone https://github.com/ThePerryDev/Hyperion-project.git
 ```
 
+### ⚙️ Backend
+
+Para rodar o backend localmente, siga os passos abaixo. Certifique-se de ter o [Python](https://www.python.org/downloads/) e o [PostgreSQL](https://www.postgresql.org/download/) instalados na sua máquina.
+
+> ⚠️ **Importante:** Por enquanto, é necessário criar manualmente o banco de dados no PostgreSQL antes de iniciar a aplicação.
+
+### 🚀 Passo a Passo para Execução
+
+#### 1. Acesse a pasta `backend`:
+
+```bash
+cd backend
+```
+
+#### 1. Crie e ative o ambiente virtual:
+
+```bash
+py -m venv ../venv
+../venv/Scripts/activate
+```
+
+#### 3. Instale as dependências (estando na pasta `backend`):
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Faça o mesmo na pasta app (estando na pasta `backend`):
+
+```bash
+cd app
+pip install -r requirements.txt
+```
+
+#### 5. Configure o banco de dados manualmente no PostgreSQL.
+
+Crie um banco com o nome `Hyperion`.
+
+#### 6. Edite o arquivo `.env` com as configurações de seu POSTGRES:
+
+```
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=123
+POSTGRES_DB=Hyperion
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+```
+
+#### 7. Inicie o servidor FastAPI (estando na pasta `backend`):
+
+```bash
+cd..
+uvicorn app.main:app --reload
+```
+
+A aplicação estará disponível em: [http://localhost:8000](http://localhost:8000)
+
 ### 📁 Estrutura Básica do Projeto
 
 ```bash
