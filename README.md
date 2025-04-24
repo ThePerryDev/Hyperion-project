@@ -4,8 +4,8 @@
 
 <p align="center">
     <a href="#sobre">Sobre</a>  |  
-    <a href="#executando">Executando o projeto</a>  |  
-    <a href="#clonando">Clonando o projeto</a>  | 
+    <a href="#executando">Executando o Projeto</a>  |  
+    <a href="#clonando">Clonando o Repositório</a>  | 
     <a href="#backend">Execução Backend</a>  |    
     <a href="#frontend">Execução Frontend</a>  |  
     <a href="#estrutura">Estruturação Básica</a>
