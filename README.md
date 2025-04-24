@@ -131,7 +131,7 @@ A aplicação estará disponível em: [http://localhost:3000](http://localhost:3
 ### 📁 Estrutura Básica do Projeto
 
 ```bash
-📦 HYPERION-PROJECT                              # ← Raiz do repositório
+📦 Hyperion-project                              # ← Raiz do repositório
 ┣ 📂 backend                                     # ← Diretório do backend (FastAPI)
 ┃ ┣ 📂 alembic                                   # ← Migrations do banco de dados com Alembic
 ┃ ┣ 📂 app                                       # ← Aplicação principal FastAPI
