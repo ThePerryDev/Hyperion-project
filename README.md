@@ -2,11 +2,26 @@
 
 <p align="center"> <img src="./Imagens_md/BANNER.png" /></p>
 
+<p align="center">
+    <a href="#sobre">Sobre</a>  |  
+    <a href="#executando">Executando o projeto</a>  |  
+    <a href="#clonando">Clonando o projeto</a>  | 
+    <a href="#backend">Execução Backend</a>  |    
+    <a href="#frontend">Execução Frontend</a>  |  
+    <a href="#estrutura">Estruturação Básica</a>
+</p>
+
+<span id="sobre">
+
 ## :bookmark_tabs: Sobre o projeto
 
 A partir da apresentação do pedido dado pela empresa Visiona, a solução apresentada pela empresa The Perry Devs consiste no desenvolvimento de aplicações web para mapeamento automático de cicatrizes de queimadas em imagens do sensor WFI a bordo dos satélites CBERS4, CBERS4A e Amazônia 1, permitindo o monitoramento de áreas afetadas por queimadas com maior eficiência e precisão na geração de dados críticos para gestores ambientais, pesquisadores e formuladores de políticas públicas.
 
+<span id="executando">
+
 ## :computer: Como Executar o Projeto
+
+<span id="clonando">
 
 ### :inbox_tray: Clonando o Repositório
 
@@ -21,6 +36,8 @@ Para clonar o repositório do projeto em sua máquina local, siga os passos abai
 ```bash
 git clone https://github.com/ThePerryDev/Hyperion-project.git
 ```
+
+<span id="backend">
 
 ### ⚙️ Backend
 
@@ -78,6 +95,38 @@ uvicorn app.main:app --reload
 ```
 
 A aplicação estará disponível em: [http://localhost:8000](http://localhost:8000)
+
+<span id="frontend">
+
+### 💻 Frontend
+
+Para rodar o frontend localmente, siga os passos abaixo. Certifique-se de ter o [Node.js (que já inclui o npm)](https://nodejs.org/pt/download) instalado na sua máquina.
+
+### 🚀 Passo a Passo para Execução do Frontend
+
+1. Acesse a pasta frontend:
+
+```bash
+cd frontend
+```
+
+2. Instale as dependências do projeto:
+
+```bash
+npm install
+```
+
+3. Inicie a aplicação React:
+
+```bash
+npm start
+```
+
+A aplicação estará disponível em: [http://localhost:3000](http://localhost:3000)
+
+> ℹ️ Por padrão, o React utilizará a porta 3000. Certifique-se de que ela esteja disponível ou será sugerido automaticamente o uso de outra porta.
+
+<span id="estrutura">
 
 ### 📁 Estrutura Básica do Projeto
 
