@@ -12,6 +12,7 @@ import {
   eyeOpenIcon,
 } from "../../assets";
 import { useState, useEffect } from "react";
+import UserRegistrationModal from "../UserRegistrationModal";
 
 // Estilos (mesmo que você enviou, sem alterações)
 const NavBar = styled.div`
@@ -199,7 +200,7 @@ const ButtonCustom = styled.button`
   border: none;
   border-radius: 25px;
   height: 40px;
-  font-size: 18px;
+  font-size: 15px;
   background-color: #fe5000;
   color: #ffffff;
   font-weight: bold;
@@ -269,6 +270,7 @@ export default function NavigationBar() {
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (showFilter || showExport || showSettings) {
@@ -436,8 +438,10 @@ export default function NavigationBar() {
 
                 {user.role === "admin" && (
                   <>
-                    <ButtonCustom> Cadastrar Usuários </ButtonCustom>
-                    <ButtonCustom> Editar usuários </ButtonCustom>
+                    <ButtonCustom onClick={() => setShowModal(true)}> Cadastrar Funcionários </ButtonCustom>
+                    {showModal && <UserRegistrationModal onClose={() => setShowModal(false)} />}
+
+                    <ButtonCustom> Editar funcionários </ButtonCustom>
                   </>
                 )}
               </>
