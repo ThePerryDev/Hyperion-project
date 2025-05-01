@@ -417,7 +417,7 @@ export default function NavigationBar() {
                     readOnly={user.role !== "admin"}
                   />
                 </OptionDiv>
-
+{/*
                 <OptionDiv>
                   <Options>Senha</Options>
                   <InputWrapper>
@@ -435,6 +435,7 @@ export default function NavigationBar() {
                     />
                   </InputWrapper>
                 </OptionDiv>
+ */}
 
                 {user.role === "admin" && (
                   <>
