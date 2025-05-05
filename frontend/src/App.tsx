@@ -2,6 +2,7 @@ import styled, { createGlobalStyle } from "styled-components";
 import CustomHeader from "./components/CustomHeader";
 import RoutesApp from "./routes";
 import NavigationBar from "./components/NavBar";
+import { BBoxProvider } from "./context/BBoxContext";
 
 const Content = styled.div`
   display: flex;
@@ -28,14 +29,16 @@ html, body, #root {
 `;
 
   return (
-    <div>
-      <GlobalStyle />
-      <CustomHeader />
-      <Content>
-        <RoutesApp />
-        <NavigationBar />
-      </Content>
-    </div>
+    <BBoxProvider>
+      <div>
+        <GlobalStyle />
+        <CustomHeader />
+        <Content>
+          <RoutesApp />
+          <NavigationBar />
+        </Content>
+      </div>
+    </BBoxProvider>
   );
 }
 

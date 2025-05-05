@@ -7,8 +7,8 @@ import {
   Polygon,
   Marker,
 } from "react-leaflet";
-import { useState } from "react";
 import L from "leaflet";
+import { useBBox } from "../../context/BBoxContext";
 
 const PageContainer = styled.div`
   height: 92vh;
@@ -50,10 +50,9 @@ const ClearButton = styled.button`
   }
 `;
 
-// 🔹 Ícone minimalista pequeno (pode trocar a URL depois)
 const minimalIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconSize: [18, 28], // menor que o padrão
+  iconSize: [18, 28],
   iconAnchor: [9, 28],
   popupAnchor: [0, -28],
   shadowUrl: "",
@@ -74,7 +73,7 @@ function MapClickHandler({
 }
 
 export default function Home() {
-  const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+  const { polygonPoints, setPolygonPoints } = useBBox();
 
   const handleMapClick = (coords: [number, number]) => {
     setPolygonPoints((prev) => {

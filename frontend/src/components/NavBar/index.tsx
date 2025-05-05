@@ -11,7 +11,9 @@ import {
   eyeCloseIcon,
   eyeOpenIcon,
 } from "../../assets";
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
+import axios from "axios";
+import { useBBox } from "../../context/BBoxContext";
 
 // Estilos (mesmo que você enviou, sem alterações)
 const NavBar = styled.div`
@@ -188,12 +190,35 @@ const InputUser = styled.input`
   padding-right: 40px;
 `;
 
-
 const InputWithIcon = styled(InputCustom)`
   padding-left: 40px;
 `;
 
 const ButtonCustom = styled.button`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #fe5000;
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: #e24600;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+const ButtonCustom2 = styled.button`
   width: 100%;
   padding: 8px;
   border: none;
@@ -269,6 +294,12 @@ export default function NavigationBar() {
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [colecoes, setColecoes] = useState<string[]>([]);
+  const [selectingBBox, setSelectingBBox] = useState(false);
+  const [colecaoSelecionada, setColecaoSelecionada] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const { polygonPoints, bbox } = useBBox();
 
   useEffect(() => {
     if (showFilter || showExport || showSettings) {
@@ -309,6 +340,43 @@ export default function NavigationBar() {
     }
   }, [showSettings]);
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/colecoes-suportadas")
+      .then((res) => {
+        console.log("Coleções retornadas:", res.data);
+        const nomes = res.data.map((colecao: { id: string }) => colecao.id);
+        setColecoes(nomes);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar coleções:", err);
+      });
+  }, []);
+
+  const aplicarFiltros = async () => {
+    if (!bbox || !colecaoSelecionada || !dataInicio || !dataFim) {
+      alert("Preencha todos os campos antes de aplicar os filtros.");
+      return;
+    }
+
+    const payload = {
+      bbox: bbox.join(","),
+      colecao: colecaoSelecionada,
+      data_inicio: dataInicio,
+      data_fim: dataFim,
+      filtrar_nuvens: false,
+    };
+
+    try {
+      const response = await axios.post("http://localhost:8000/buscar-imagens", payload);
+      console.log("Imagens retornadas:", response.data);
+      alert(`Foram encontradas ${response.data.length} imagens.`);
+    } catch (error) {
+      console.error("Erro ao buscar imagens:", error);
+      alert("Erro ao buscar imagens. Veja o console para mais detalhes.");
+    }
+  };
+
   return (
     <NavBar>
       {showFilter && (
@@ -320,27 +388,61 @@ export default function NavigationBar() {
             <h3>Localizar</h3>
             <InputWrapper>
               <SearchIcon src={searchIcon} alt="Buscar" />
-              <InputWithIcon type="text" placeholder="Buscar..." />
+              <InputWithIcon type="text" placeholder="Buscar cidade" />
             </InputWrapper>
-            <ButtonCustom>Selecionar Área</ButtonCustom>
+
+            {!selectingBBox && polygonPoints.length < 4 && (
+              <ButtonCustom
+                onClick={() => {
+                  setShowFilter(false);
+                  setSelectingBBox(true);
+                }}
+              >
+                Selecionar Área
+              </ButtonCustom>
+            )}
+
+            {bbox && (
+              <>
+                <OptionDiv>
+                  <InputCustom2 value= {bbox[0]} readOnly />
+                </OptionDiv>
+                <OptionDiv>
+                <InputCustom2 value= {bbox[1]} readOnly />
+                </OptionDiv>
+                <OptionDiv>
+                <InputCustom2 value= {bbox[2]} readOnly />
+                </OptionDiv>
+                <OptionDiv>
+                <InputCustom2 value= {bbox[3]} readOnly />
+                </OptionDiv>
+              </>
+            )}
+
             <OptionDiv>
-              <Options>Coleção Satelite</Options>
-              <SelectCustom defaultValue="">
+              <Options>Coleção/Satelite</Options>
+              <SelectCustom
+                value={colecaoSelecionada}
+                onChange={(e) => setColecaoSelecionada(e.target.value)}
+              >
                 <option value="" disabled hidden>
-                  Selecione...
+                  Selecione a Coleção
                 </option>
-                <option value="sentinel">placeholder</option>
+                {colecoes.map((colecaoId) => (
+                  <option key={colecaoId} value={colecaoId}>{colecaoId}</option>
+                ))}
               </SelectCustom>
             </OptionDiv>
             <OptionDiv>
               <Options>Data Início (UTC)</Options>
-              <InputCustom type="date" />
+              <InputCustom type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
             </OptionDiv>
             <OptionDiv>
               <Options>Data Fim (UTC)</Options>
-              <InputCustom type="date" />
+              <InputCustom type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
             </OptionDiv>
           </ScrollContainer>
+          <ButtonCustom2 onClick={aplicarFiltros}>Aplicar Filtros</ButtonCustom2>
         </FilterPanel>
       )}
       {showExport && (
@@ -367,12 +469,16 @@ export default function NavigationBar() {
               <InputCustom2 placeholder="Limite Direito Inferior" />
             </OptionDiv>
             <OptionDiv>
-              <Options>Coleção (Satélite)</Options>
+              <Options>Coleção/Satelite</Options>
               <SelectCustom defaultValue="">
                 <option value="" disabled hidden>
-                  Selecione...
+                  Selecione a Coleção
                 </option>
-                <option value="sentinel">placeholder</option>
+                {colecoes.map((colecaoId) =>(
+                  <option key={colecaoId} value={colecaoId}>
+                    {colecaoId}
+                  </option>
+                ))}
               </SelectCustom>
             </OptionDiv>
             <OptionDiv>
