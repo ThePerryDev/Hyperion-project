@@ -7,6 +7,7 @@ class STACRequest(BaseModel):
     data_fim: str
     colecao: str
     filtrar_nuvens: Optional[bool] = False
+    limite: Optional[int] = 100
 
 class STACImagemFiltrada(BaseModel):
     id: str

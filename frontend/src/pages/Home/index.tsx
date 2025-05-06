@@ -35,8 +35,8 @@ const MapWrapper = styled.div`
 
 const ClearButton = styled.button`
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
   background-color: #fe5000;
   color: white;
   padding: 0.5rem 1rem;
