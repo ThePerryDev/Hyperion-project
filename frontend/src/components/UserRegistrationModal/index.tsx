@@ -6,22 +6,12 @@ interface Props {
 }
 
 interface User {
-<<<<<<< Updated upstream
   name: string;
-=======
-  id_usuario?: number;
-  nome: string;
->>>>>>> Stashed changes
   email: string;
   password: string;
   role: string;
 }
 
-<<<<<<< Updated upstream
-=======
-const API_URL = 'http://localhost:8000/api/v1/usuarios';
-
->>>>>>> Stashed changes
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -109,24 +99,7 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     setRegisteredUsers([...registeredUsers, user]);
     console.log("Mock enviado:", user);
 
-<<<<<<< Updated upstream
-    // Limpa campos
     setUser({ name: "", email: "", password: "", role: "" });
-=======
-      if (!response.ok) {
-        throw new Error('Erro ao cadastrar usuário');
-      }
-
-      const newUser = await response.json();
-      setRegisteredUsers([...registeredUsers, newUser]);
-      alert('Usuário cadastrado com sucesso!');
-
-      setUser({ nome: '', email: '', senha: '', admin: false });
-    } catch (error) {
-      console.error(error);
-      alert('Erro ao cadastrar usuário');
-    }
->>>>>>> Stashed changes
   };
 
   return (
@@ -138,7 +111,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
         <Input name="password" placeholder="Senha" type="password" value={user.password} onChange={handleChange} />
         <Input name="role" placeholder="Função" value={user.role} onChange={handleChange} />
         <div>
-<<<<<<< Updated upstream
           <Button onClick={handleSubmit}>Cadastrar</Button>
           <Button onClick={onClose}>Fechar</Button>
         </div>
@@ -156,46 +128,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
             ))}
           </div>
         )}
-=======
-          <h2>Cadastrar Funcionário</h2>
-          <Input
-            name="nome"
-            placeholder="Nome"
-            value={user.nome}
-            onChange={handleChange}
-          />
-          <Input
-            name="email"
-            placeholder="Email"
-            value={user.email}
-            onChange={handleChange}
-          />
-          <Input
-            name="senha"
-            placeholder="Senha"
-            type="password"
-            value={user.senha}
-            onChange={handleChange}
-          />
-          <div>
-            <label>Função:</label>
-            <Select
-              name="admin"
-              value={user.admin ? 'admin' : 'usuario'}
-              onChange={(e) =>
-                setUser({ ...user, admin: e.target.value === 'admin' })
-              }
-            >
-              <option value="usuario">Outros</option>
-              <option value="admin">Admin</option>
-            </Select>
-          </div>
-          <div>
-            <Button onClick={handleSubmit}>Cadastrar</Button>
-            <Button onClick={onClose}>Fechar</Button>
-          </div>
-        </div>
->>>>>>> Stashed changes
       </ModalContent>
     </ModalOverlay>
   );
