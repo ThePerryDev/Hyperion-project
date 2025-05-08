@@ -13,6 +13,8 @@
 
 <span id="sobre">
 
+<a href="./Imagens_md/README_Daily_06_05_2025.md">Acesse o relatório da Daily Scrum (06/05/2025)</a>
+
 ## :bookmark_tabs: Sobre o projeto
 
 A partir da apresentação do pedido dado pela empresa Visiona, a solução apresentada pela empresa The Perry Devs consiste no desenvolvimento de aplicações web para mapeamento automático de cicatrizes de queimadas em imagens do sensor WFI a bordo dos satélites CBERS4, CBERS4A e Amazônia 1, permitindo o monitoramento de áreas afetadas por queimadas com maior eficiência e precisão na geração de dados críticos para gestores ambientais, pesquisadores e formuladores de políticas públicas.
