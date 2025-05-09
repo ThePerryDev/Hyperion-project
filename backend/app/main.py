@@ -4,18 +4,9 @@ from app.routes import stac_routes
 from app.core.database import engine, Base
 from app.routes.usuario_route import router as usuario_router
 from app.schemas.tb_consulta import create_tables
-from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 app = FastAPI(title="Monitoramento de Queimadas")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Permite todas as origens (ajuste conforme necessário)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Criação das tabelas no banco de dados durante a inicialização
 @app.on_event("startup")
