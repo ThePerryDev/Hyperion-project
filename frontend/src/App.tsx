@@ -1,3 +1,4 @@
+import "./index.css"
 import styled, { createGlobalStyle } from "styled-components";
 import CustomHeader from "./components/CustomHeader";
 import RoutesApp from "./routes";
