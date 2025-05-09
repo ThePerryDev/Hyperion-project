@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useBBox } from "../../context/BBoxContext";
 
 const Panel = styled.div`
   position: absolute;
@@ -34,12 +35,21 @@ const Panel = styled.div`
   }
 `;
 
-const Title =styled.h3`
-    margin-top: 0.5;
-    margin-bottom: 0.2rem;
-    color: #333;
-    text-align: center;
+const Title = styled.h3`
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  color: #333;
+  text-align: center;
 `;
+
+const ImageCountText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  text-align: center;
+`;
+
 const ScrollContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -47,13 +57,12 @@ const ScrollContainer = styled.div`
   align-items: center;
 `;
 
-const ThumbnailCard = styled.div`
+const ThumbnailCard = styled.div<{ selected: boolean }>`
   width: 100%;
   background-color: #d9d9d9;
   border-radius: 12px;
   padding: 1rem;
-  align-content: center;
-  justify-content: center;
+  border: ${({ selected }) => (selected ? "3px solid #fe5000" : "none")};
 `;
 
 const ThumbnailImage = styled.img`
@@ -106,32 +115,116 @@ interface ThumbnailViewerProps {
     thumbnail: string;
     colecao?: string;
     bbox?: number[];
-    data?:string;
+    data?: string;
+    bandas?: {
+      BAND15?: string;
+      BAND16?: string;
+    };
   }[];
   onClose: () => void;
 }
 
 export default function ThumbnailViewer({ imagens, onClose }: ThumbnailViewerProps) {
+  const {
+    imagemThumbnail,
+    setImagemThumbnail,
+    setMostrarThumbnail,
+    setImagemProcessada,
+    setMostrarProcessada,
+  } = useBBox();
+
   const formatarData = (dataISO?: string) => {
     if (!dataISO) return "";
     const [ano, mes, dia] = dataISO.split("-");
     return `${dia}/${mes}/${ano}`;
   };
 
-  
+  const handleSelecionarImagem = (img: {
+    id: string;
+    thumbnail: string;
+    bbox?: number[];
+  }) => {
+    if (img.bbox) {
+      setImagemThumbnail({
+        id: img.id,
+        thumbnail: img.thumbnail,
+        bbox: img.bbox,
+      });
+      setMostrarThumbnail(true);
+    } else {
+      alert("Imagem sem BBOX disponível para visualização.");
+    }
+  };
+
+  const handleProcessarImagem = async (img: {
+    id: string;
+    thumbnail: string;
+    bbox?: number[];
+    bandas?: { [key: string]: string };
+  }) => {
+    if (!img.bbox || !img.bandas?.BAND15 || !img.bandas?.BAND16) {
+      alert("Imagem selecionada não possui BBOX ou bandas necessárias.");
+      return;
+    }
+
+    const payload = {
+      id: img.id,
+      band15_url: img.bandas.BAND15,
+      band16_url: img.bandas.BAND16,
+      bbox: img.bbox,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/processar-imagem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Erro no processamento da imagem.");
+
+      const resultado = await response.json();
+      const imagemProcessadaUrl = `http://localhost:8000${resultado.preview_png}`;
+      const bboxFinal = resultado.bbox_real ?? resultado.bbox;
+
+      setImagemProcessada({
+        id: img.id,
+        thumbnail: imagemProcessadaUrl,
+        bbox: bboxFinal,
+      });
+
+      setMostrarProcessada(true);
+    } catch (error) {
+      console.error("Erro ao processar imagem:", error);
+      alert("Erro ao processar imagem.");
+    }
+  };
+
   return (
     <Panel>
       <ScrollContainer>
         <Title>Resultados da Busca</Title>
-        {imagens.map((img) => (
-          <ThumbnailCard key={img.id}>
-            <ThumbnailImage src={img.thumbnail} alt={img.id} />
-            <InfoText><strong>Id: </strong> {img.id}</InfoText>
-            <InfoText><strong>BBOX: </strong> {img.bbox?.join(", ")}</InfoText>
-            <InfoText><strong>Data: </strong>{formatarData(img.data)}</InfoText>
-            <SelectButton>Selecionar</SelectButton>
-          </ThumbnailCard>
-        ))}
+        <ImageCountText>{imagens.length} imagens foram encontradas</ImageCountText>
+        {imagens.map((img) => {
+          const isSelected = imagemThumbnail?.id === img.id;
+
+          return (
+            <ThumbnailCard key={img.id} selected={isSelected}>
+              <ThumbnailImage src={img.thumbnail} alt={img.id} />
+              <InfoText><strong>Id:</strong> {img.id}</InfoText>
+              <InfoText><strong>BBOX:</strong> {img.bbox?.join(", ")}</InfoText>
+              <InfoText><strong>Data:</strong> {formatarData(img.data)}</InfoText>
+
+              <SelectButton onClick={() => handleSelecionarImagem(img)}>
+                Selecionar
+              </SelectButton>
+
+              {isSelected && (
+                <SelectButton onClick={() => handleProcessarImagem(img)}>Processar Imagem</SelectButton>
+              )}
+            </ThumbnailCard>
+          );
+        })}
         <ButtonVoltar onClick={onClose}>Voltar para Filtros</ButtonVoltar>
       </ScrollContainer>
     </Panel>
