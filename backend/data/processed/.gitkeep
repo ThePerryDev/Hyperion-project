@@ -1,0 +1,3 @@
+touch backend/data/.gitkeep
+touch backend/data/raw/.gitkeep
+touch backend/data/processed/.gitkeep
