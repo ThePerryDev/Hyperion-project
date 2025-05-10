@@ -1,8 +1,11 @@
-import "./index.css"
+import "./index.css";
 import styled, { createGlobalStyle } from "styled-components";
 import CustomHeader from "./components/CustomHeader";
 import RoutesApp from "./routes";
 import NavigationBar from "./components/NavBar";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+import { Login } from "./pages";
 
 const Content = styled.div`
   display: flex;
@@ -12,6 +15,8 @@ const Content = styled.div`
 `;
 
 function App() {
+  const auth = useContext(AuthContext);
+
   const GlobalStyle = createGlobalStyle`
 * {
   box-sizing: border-box;
@@ -29,14 +34,20 @@ html, body, #root {
 `;
 
   return (
-    <div>
-      <GlobalStyle />
-      <CustomHeader />
-      <Content>
-        <RoutesApp />
-        <NavigationBar />
-      </Content>
-    </div>
+    <main>
+      {!auth.user ? (
+        <Login />
+      ) : (
+        <div>
+          <GlobalStyle />
+          <CustomHeader />
+          <Content>
+            <RoutesApp />
+            <NavigationBar />
+          </Content>
+        </div>
+      )}
+    </main>
   );
 }
 
