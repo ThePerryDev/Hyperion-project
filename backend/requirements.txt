@@ -12,3 +12,8 @@ pydantic
 typing
 dotenv
 matplotlib
+requests
+Pillow
+torch
+segmentation-models-pytorch
+pyproj

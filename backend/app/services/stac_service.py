@@ -15,7 +15,7 @@ def buscar_imagens_stac(params: STACRequest):
         collections=[params.colecao],
         bbox=bbox,
         datetime=f"{params.data_inicio}/{params.data_fim}",
-        limit=10
+        limit=100
     )
 
     items = search.items()
