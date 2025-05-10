@@ -22,7 +22,8 @@ export const useApi = ()=> ({
           const email = user.email;
           const password = user.password;
           const isLogged = true;
-          return await service.put({ id, name, email, password, isLogged});
+          const admin = user.admin;
+          return await service.put({ id, name, email, password, isLogged, admin});
         }
         return null
       },
@@ -35,7 +36,8 @@ export const useApi = ()=> ({
           const name = user.name;
           const password = user.password;
           const isLogged = false;
-          await service.put({ id, name, email, password, isLogged });
+          const admin = user.admin;
+          await service.put({ id, name, email, password, isLogged, admin });
         }
         
       }
@@ -63,8 +65,7 @@ async function getUserPosition(email: string) {
   }
 
   let s_number = new Search<number>();
-
-  console.log(users)
+  
   return s_number.sequential_ws(email, mailList);
 }
 
