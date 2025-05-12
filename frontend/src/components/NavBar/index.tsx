@@ -284,7 +284,7 @@ export default function NavigationBar() {
   }, [showFilter, showExport, showSettings]);
 
  const handleLogout = async () => {
-    await auth.signout();
+    auth.signout();
     window.location.reload();
   };
 
@@ -394,14 +394,14 @@ export default function NavigationBar() {
                 <OptionDiv>
                   <Options>Nome do funcionário</Options>
                   <InputUser
-                    value={user?.name || ""}
+                    value={user?.name ?? ""}
                     readOnly={user?.admin !== true}
                   />
                 </OptionDiv>
                 <OptionDiv>
                   <Options>Email</Options>
                   <InputUser
-                    value={user?.email || ""}
+                    value={user?.email ?? ""}
                     readOnly={user?.admin !== true}
                   />
                 </OptionDiv>
@@ -418,7 +418,7 @@ export default function NavigationBar() {
 
                     <InputUser
                       type={showPassword ? "text" : "password"}
-                      value={user?.password || ""}
+                      value={user?.password ?? ""}
                       readOnly={user?.admin !== true}
                     />
                   </InputWrapper>
