@@ -8,8 +8,8 @@ class UsuarioController:
     def __init__(self):
         self.session: AsyncSession = SessionLocal()
 
-    async def criar_usuario(self, nome, email, senha, admin=False):
-        usuario = Usuario(nome=nome, email=email, senha=senha, admin=admin)
+    async def criar_usuario(self, name, email, password, admin=False, isLogged=False):
+        usuario = Usuario(name=name, email=email, password=password, admin=admin, isLogged=isLogged)
         async with self.session as session:
             async with session.begin():
                 session.add(usuario)
@@ -22,35 +22,36 @@ class UsuarioController:
                 usuarios = result.scalars().all()
         return usuarios
 
-    async def buscar_usuario_por_id(self, id_usuario):
+    async def buscar_usuario_por_id(self, id):
         async with self.session as session:
             async with session.begin():
-                result = await session.execute(select(Usuario).where(Usuario.id_usuario == id_usuario))
+                result = await session.execute(select(Usuario).where(Usuario.id == id))  # Alterado id_usuario para id
                 try:
                     usuario = result.scalar_one()
                 except NoResultFound:
                     usuario = None
         return usuario
 
-    async def atualizar_usuario(self, id_usuario, nome, email, senha, admin):
+    async def atualizar_usuario(self, id, name, email, password, admin, isLogged):
         async with self.session as session:
             async with session.begin():
-                result = await session.execute(select(Usuario).where(Usuario.id_usuario == id_usuario))
+                result = await session.execute(select(Usuario).where(Usuario.id == id))  # Alterado id_usuario para id
                 try:
                     usuario = result.scalar_one()
-                    usuario.nome = nome
+                    usuario.name = name
                     usuario.email = email
-                    usuario.senha = senha
+                    usuario.password = password
                     usuario.admin = admin
+                    usuario.isLogged = isLogged
                     await session.commit()
                 except NoResultFound:
                     usuario = None
         return usuario
 
-    async def deletar_usuario(self, id_usuario):
+    async def deletar_usuario(self, id):
         async with self.session as session:
             async with session.begin():
-                result = await session.execute(select(Usuario).where(Usuario.id_usuario == id_usuario))
+                result = await session.execute(select(Usuario).where(Usuario.id == id))  # Alterado id_usuario para id
                 try:
                     usuario = result.scalar_one()
                     await session.delete(usuario)

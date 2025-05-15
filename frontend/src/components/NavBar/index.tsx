@@ -11,8 +11,9 @@ import {
   eyeCloseIcon,
   eyeOpenIcon,
 } from "../../assets";
-import { useState, useEffect } from "react";
 import UserRegistrationModal from "../UserRegistrationModal";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 // Estilos (mesmo que você enviou, sem alterações)
 const NavBar = styled.div`
@@ -272,6 +273,10 @@ export default function NavigationBar() {
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  const { user } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+
+
   useEffect(() => {
     if (showFilter || showExport || showSettings) {
       setIsLoading(true);
@@ -282,12 +287,10 @@ export default function NavigationBar() {
     }
   }, [showFilter, showExport, showSettings]);
 
-  const [user, setUser] = useState({
-    name: "",
-    role: "",
-    email: "",
-    password: "",
-  });
+ const handleLogout = async () => {
+    auth.signout();
+    window.location.reload();
+  };
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -299,13 +302,6 @@ export default function NavigationBar() {
     if (showSettings) {
       setIsLoading(true);
       setTimeout(() => {
-        // Simulando carregamento de usuário mockado
-        setUser({
-          name: "Ana Souza",
-          role: "admin", // mude para "user" para testar não-admin
-          email: "ana.souza@email.com",
-          password: "123456",
-        });
         setIsLoading(false);
       }, 1500);
     }
@@ -402,19 +398,15 @@ export default function NavigationBar() {
                 <OptionDiv>
                   <Options>Nome do funcionário</Options>
                   <InputUser
-                    value={user.name}
-                    readOnly={user.role !== "admin"}
+                    value={user?.name ?? ""}
+                    readOnly={user?.admin !== true}
                   />
-                </OptionDiv>
-                <OptionDiv>
-                  <Options>Cargo</Options>
-                  <InputUser value={user.role} readOnly />
                 </OptionDiv>
                 <OptionDiv>
                   <Options>Email</Options>
                   <InputUser
-                    value={user.email}
-                    readOnly={user.role !== "admin"}
+                    value={user?.email ?? ""}
+                    readOnly={user?.admin !== true}
                   />
                 </OptionDiv>
 {/*
@@ -430,14 +422,14 @@ export default function NavigationBar() {
 
                     <InputUser
                       type={showPassword ? "text" : "password"}
-                      value={user.password}
-                      readOnly={user.role !== "admin"}
+                      value={user?.password ?? ""}
+                      readOnly={user?.admin !== true}
                     />
                   </InputWrapper>
                 </OptionDiv>
  */}
 
-                {user.role === "admin" && (
+                {user?.admin === true && (
                   <>
                     <ButtonCustom onClick={() => setShowModal(true)}> Cadastrar Funcionários </ButtonCustom>
                     {showModal && <UserRegistrationModal onClose={() => setShowModal(false)} />}
@@ -445,6 +437,7 @@ export default function NavigationBar() {
                     <ButtonCustom> Editar funcionários </ButtonCustom>
                   </>
                 )}
+                <ButtonCustom onClick={handleLogout}> SAIR </ButtonCustom>
               </>
             )}
           </ScrollContainer>
