@@ -56,8 +56,8 @@ cd backend
 2. Crie e ative o ambiente virtual:
 
 ```bash
-py -m venv ../venv
-../venv/Scripts/activate
+py -m venv venv
+./venv/Scripts/activate
 ```
 
 3. Instale as dependências (estando na pasta `backend`):
