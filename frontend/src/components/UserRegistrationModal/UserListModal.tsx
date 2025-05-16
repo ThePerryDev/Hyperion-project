@@ -8,8 +8,8 @@ interface Props {
 }
 
 interface User {
-    id_usuario?: number;
-    nome: string;
+    id?: number;
+    name: string;
     email: string;
     admin: boolean;
     senha: string;
@@ -153,7 +153,7 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
     try {
       const res = await fetch(`${API_URL}/delete/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      setUsers(users.filter((u) => u.id_usuario !== id));
+      setUsers(users.filter((u) => u.id !== id));
       alert("Usuário excluído com sucesso!");
     } catch {
       alert("Erro ao excluir usuário");
@@ -182,9 +182,9 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
           <>
             <UserListContainer>
               {users.map((user) => (
-                <UserCard key={user.id_usuario}>
+                <UserCard key={user.id}>
                   <p>
-                    <strong>Nome: {user.nome}</strong> —{" "}
+                    <strong>Nome: {user.name}</strong> —{" "}
                     {user.admin ? "Admin" : "Usuário"}
                   </p>
                   <p>
@@ -196,12 +196,12 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
                     <InputWrapper>
                       <EyeButton
                         onClick={() =>
-                          togglePasswordVisibility(user.id_usuario!)
+                          togglePasswordVisibility(user.id!)
                         }
                       >
                         <img
                           src={
-                            showPasswordId === user.id_usuario
+                            showPasswordId === user.id
                               ? eyeOpenIcon
                               : eyeCloseIcon
                           }
@@ -211,7 +211,7 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
 
                       <InputUser
                         type={
-                          showPasswordId === user.id_usuario
+                          showPasswordId === user.id
                             ? "text"
                             : "password"
                         }
@@ -225,7 +225,7 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
                     <Button onClick={() => setEditingUser(user)}>Editar</Button>
                     <Button
                       color="red"
-                      onClick={() => handleDelete(user.id_usuario!)}
+                      onClick={() => handleDelete(user.id!)}
                     >
                       Excluir
                     </Button>

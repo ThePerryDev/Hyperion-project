@@ -7,7 +7,7 @@ router = APIRouter()
 usuario_controller = UsuarioController()
 
 class UsuarioSchema(BaseModel):
-    name: str
+    name: str 
     email: str
     password: str
     admin: bool = False

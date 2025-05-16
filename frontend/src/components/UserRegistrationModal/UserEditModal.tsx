@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import styled from "styled-components";
 
 interface Props {
   user: User;
@@ -8,13 +8,13 @@ interface Props {
 }
 
 interface User {
-  id_usuario?: number;
-  nome: string;
+  id?: number;
+  name: string;
   email: string;
   admin: boolean;
 }
 
-const API_URL = 'http://localhost:8000/api/v1/usuarios';
+const API_URL = "http://localhost:8000/api/v1/usuarios";
 
 const ModalContent = styled.div`
   background: #fff;
@@ -35,13 +35,13 @@ const Button = styled.button<{ color?: string }>`
   padding: 6px 12px;
   border: none;
   border-radius: 6px;
-  background-color: ${({ color }) => color || '#fe5000'};
+  background-color: ${({ color }) => color || "#fe5000"};
   color: white;
   cursor: pointer;
 
   &:hover {
     background-color: ${({ color }) =>
-      color === '#888' ? '#666' : color === 'red' ? '#cc0000' : '#e24600'};
+      color === "#888" ? "#666" : color === "red" ? "#cc0000" : "#e24600"};
   }
 `;
 
@@ -54,44 +54,44 @@ const Input = styled.input`
 `;
 
 const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
-  const [nome, setNome] = useState(user.nome);
+  const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [admin, setAdmin] = useState(user.admin);
-  const [senha, setSenha] = useState('');
+  const [password, setPassword] = useState("");
 
   const handleEditSubmit = async () => {
-    if (!user.id_usuario) {
-      alert('ID do usuário não encontrado.');
+    if (!user.id) {
+      alert("ID do usuário não encontrado.");
       return;
     }
 
     const payload = {
-      nome,
+      name,
       email,
       admin,
-      senha: senha,
+      password,
     };
 
     try {
-      const response = await fetch(`${API_URL}/put/${user.id_usuario}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/put/${user.id}`, {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Erro:', errorData);
-        throw new Error(errorData.detail || 'Erro ao atualizar usuário');
+        const raw = await response.text();
+        console.error("Erro bruto da API:", raw);
+        throw new Error("Erro ao atualizar usuário");
       }
 
-      alert('Usuário atualizado com sucesso!');
+      alert("Usuário atualizado com sucesso!");
       if (onSaveSuccess) onSaveSuccess();
       onCancel();
     } catch (error: any) {
-      alert(error.message || 'Erro ao atualizar usuário');
+      alert(error.message || "Erro ao atualizar usuário");
       console.error(error);
     }
   };
@@ -100,18 +100,36 @@ const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
     <ModalContent>
       <Title>Editar Usuário</Title>
       <label>Nome:</label>
-      <Input type="text" value={nome} onChange={(e) => setNome(e.target.value)} />
+      <Input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
       <label>Email:</label>
-      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
       <label>Senha (opcional):</label>
-      <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
+      <Input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
       <label>
-        <input type="checkbox" checked={admin} onChange={(e) => setAdmin(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={admin}
+          onChange={(e) => setAdmin(e.target.checked)}
+        />
         Admin
       </label>
-      <div style={{ marginTop: '1rem' }}>
+      <div style={{ marginTop: "1rem" }}>
         <Button onClick={handleEditSubmit}>Salvar</Button>
-        <Button color="#888" onClick={onCancel}>Cancelar</Button>
+        <Button color="#888" onClick={onCancel}>
+          Cancelar
+        </Button>
       </div>
     </ModalContent>
   );
