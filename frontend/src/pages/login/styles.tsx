@@ -1,13 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
-import bgImage from "../assets/img/login_background.png";
-import user_icon from "../assets/img/user_login_icon.png";
-import password_icon from "../assets/img/password_login_icon.png";
-import hyperio_logo from "../assets/img/hyperion_login_logo.png";
-import { breakpoints } from "../styles/brekpoints";
+import bgImage from "../../assets/img/login_background.png"
+import { breakpoints } from "../../styles/brekpoints";
 
-const LoginSld = styled.main`
+export const LoginSld = styled.main`
   height: 100%;
   background-image: url(${bgImage});
   background-color: black;
@@ -58,7 +53,6 @@ const LoginSld = styled.main`
       font-family: "Jost", sans-serif;
     }
 
-    /* Tablet */
     @media (max-width: ${breakpoints.tablet}) {
       padding: 20px 30px;
       gap: 20px;
@@ -72,7 +66,6 @@ const LoginSld = styled.main`
       }
     }
 
-    /* Celular */
     @media (max-width: ${breakpoints.mobile}) {
       padding: 20px 15px;
       gap: 15px;
@@ -90,7 +83,6 @@ const LoginSld = styled.main`
       }
     }
 
-    /* Mini celulares  */
     @media (max-width: ${breakpoints.mini}) {
       padding: 15px 10px;
       gap: 12px;
@@ -115,7 +107,7 @@ const LoginSld = styled.main`
   }
 `;
 
-const InputSld = styled.div`
+export const InputSld = styled.div`
   display: flex;
   background-color: white;
   border: none;
@@ -137,7 +129,6 @@ const InputSld = styled.div`
     width: 100%;
   }
 
-  /* Tablet */
   @media (max-width: ${breakpoints.tablet}) {
     padding: 5px 10px;
     max-width: 260px;
@@ -152,7 +143,6 @@ const InputSld = styled.div`
     }
   }
 
-  /* Celular */
   @media (max-width: ${breakpoints.mobile}) {
     padding: 4px 8px;
     max-width: 220px;
@@ -167,7 +157,6 @@ const InputSld = styled.div`
     }
   }
 
-  /* Mini celulares */
   @media (max-width: ${breakpoints.mini}) {
     padding: 3px 6px;
     max-width: 190px;
@@ -182,43 +171,3 @@ const InputSld = styled.div`
     }
   }
 `;
-
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  return (
-    <LoginSld>
-      <form>
-        <img id="hyperion-logo" src={hyperio_logo} alt="Hyperion login logo" />
-
-        <h1>LOGIN</h1>
-
-        <InputSld>
-          <img src={user_icon} alt="" />
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-          />
-        </InputSld>
-
-        <InputSld>
-          <img src={password_icon} alt="" />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Senha"
-          />
-        </InputSld>
-
-        <button> ENTRAR</button>
-        <Link id="navigate" to="/register">
-          Registre-se
-        </Link>
-      </form>
-    </LoginSld>
-  );
-}
