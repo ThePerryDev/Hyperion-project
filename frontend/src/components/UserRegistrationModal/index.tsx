@@ -1,16 +1,19 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 interface Props {
   onClose: () => void;
 }
 
 interface User {
-  name: string;
+  id_usuario?: number;
+  nome: string;
   email: string;
-  password: string;
-  role: string;
+  senha: string;
+  admin: boolean;
 }
+
+const API_URL = 'http://localhost:8000/api/v1/usuarios';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -76,54 +79,163 @@ const UserCard = styled.div`
   margin-top: 1rem;
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff;
+  appearance: none;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #fe5000;
+    box-shadow: 0 0 0 2px rgba(254, 80, 0, 0.2);
+  }
+`;
+
 const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
   const [user, setUser] = useState<User>({
-    name: "",
-    email: "",
-    password: "",
-    role: "",
+    nome: '',
+    email: '',
+    senha: '',
+    admin: false,
   });
 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({
+      ...prev,
+      [name]: name === 'admin' ? value === 'admin' : value,
+    }));
   };
 
-  const handleSubmit = () => {
-    if (!user.name || !user.email || !user.password || !user.role) {
-      alert("Preencha todos os campos!");
+  const handleSubmit = async () => {
+    if (!user.nome || !user.email || !user.senha) {
+      alert('Preencha todos os campos!');
       return;
     }
 
-    setRegisteredUsers([...registeredUsers, user]);
-    console.log("Mock enviado:", user);
+    try {
+      const response = await fetch(`${API_URL}/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      });
 
-    setUser({ name: "", email: "", password: "", role: "" });
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar usuário');
+      }
+
+      const newUser = await response.json();
+      setRegisteredUsers([...registeredUsers, newUser]);
+      alert('Usuário cadastrado com sucesso!');
+
+      setUser({ nome: '', email: '', senha: '', admin: false });
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao cadastrar usuário');
+    }
   };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${API_URL}/getall`);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar usuários');
+      }
+
+      const users = await response.json();
+      setRegisteredUsers(users);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao carregar usuários');
+    }
+  };
+
+  const handleDelete = async (id_usuario: number) => {
+    try {
+      const response = await fetch(`${API_URL}/delete/${id_usuario}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao deletar usuário');
+      }
+
+      setRegisteredUsers(
+        registeredUsers.filter((u) => u.id_usuario !== id_usuario)
+      );
+      alert('Usuário deletado com sucesso!');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao deletar usuário');
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <ModalOverlay>
       <ModalContent>
-        <h2>Cadastrar Funcionário</h2>
-        <Input name="name" placeholder="Nome" value={user.name} onChange={handleChange} />
-        <Input name="email" placeholder="Email" value={user.email} onChange={handleChange} />
-        <Input name="password" placeholder="Senha" type="password" value={user.password} onChange={handleChange} />
-        <Input name="role" placeholder="Função" value={user.role} onChange={handleChange} />
         <div>
-          <Button onClick={handleSubmit}>Cadastrar</Button>
-          <Button onClick={onClose}>Fechar</Button>
+          <h2>Cadastrar Funcionário</h2>
+          <Input
+            name="nome"
+            placeholder="Nome"
+            value={user.nome}
+            onChange={handleChange}
+          />
+          <Input
+            name="email"
+            placeholder="Email"
+            value={user.email}
+            onChange={handleChange}
+          />
+          <Input
+            name="senha"
+            placeholder="Senha"
+            type="password"
+            value={user.senha}
+            onChange={handleChange}
+          />
+          <div>
+            <label>Função:</label>
+            <Select
+              name="admin"
+              value={user.admin ? 'admin' : 'usuario'}
+              onChange={handleChange}
+            >
+              <option value="usuario">Usuário</option>
+              <option value="admin">Admin</option>
+            </Select>
+          </div>
+          <div>
+            <Button onClick={handleSubmit}>Cadastrar</Button>
+            <Button onClick={onClose}>Fechar</Button>
+          </div>
         </div>
 
-
-    {/*Essa parte debaixo é só para testar se estava cadastrando (e está) */}
         {registeredUsers.length > 0 && (
           <div>
             <h3>Funcionários cadastrados:</h3>
-            {registeredUsers.map((u, index) => (
-              <UserCard key={index}>
-                <strong>{u.name}</strong> — {u.role}<br />
+            {registeredUsers.map((u) => (
+              <UserCard key={u.id_usuario}>
+                <strong>{u.nome}</strong> — {u.admin ? 'Admin' : 'Usuário'}
+                <br />
                 <small>{u.email}</small>
+                <Button onClick={() => handleDelete(u.id_usuario!)}>
+                  Deletar
+                </Button>
               </UserCard>
             ))}
           </div>

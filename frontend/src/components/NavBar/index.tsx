@@ -11,9 +11,10 @@ import {
   eyeCloseIcon,
   eyeOpenIcon,
 } from "../../assets";
-import { useState, useEffect } from "react";
-import UserRegistrationModal from "../UserRegistrationModal/index";
 import UserListModal from "../UserRegistrationModal/UserListModal";
+import UserRegistrationModal from "../UserRegistrationModal";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const NavBar = styled.div`
   position: absolute;
@@ -268,15 +269,28 @@ export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const [user, setUser] = useState({
-    name: "",
-    role: "",
-    email: "",
-    password: "",
-  });
+  const { user } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+
+
+  useEffect(() => {
+    if (showFilter || showExport || showSettings) {
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showFilter, showExport, showSettings]);
+
+ const handleLogout = async () => {
+    auth.signout();
+    window.location.reload();
+  };
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -284,16 +298,15 @@ export default function NavigationBar() {
     setShowPassword((prev) => !prev);
   };
 
-  useEffect(() => {
-    if (showSettings) {
-      setUser({
-        name: "Ana Souza",
-        role: "admin", // mude para "user" para testar não-admin
-        email: "ana.souza@email.com",
-        password: "123456",
-      });
-    }
-  }, [showSettings]);
+useEffect(() => {
+  if (showSettings) {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  }
+}, [showSettings]);
+
 
   return (
     <NavBar>
@@ -395,7 +408,25 @@ export default function NavigationBar() {
                   readOnly={user.role !== "admin"}
                 />
               </OptionDiv>
+              {/*
+                <OptionDiv>
+                  <Options>Senha</Options>
+                  <InputWrapper>
+                    <EyeButton onClick={togglePasswordVisibility}>
+                      <img
+                        src={showPassword ? eyeOpenIcon : eyeCloseIcon}
+                        alt="Mostrar senha"
+                      />
+                    </EyeButton>
 
+                    <InputUser
+                      type={showPassword ? "text" : "password"}
+                      value={user?.password ?? ""}
+                      readOnly={user?.admin !== true}
+                    />
+                  </InputWrapper>
+                </OptionDiv>
+              */}
               {user.role === "admin" && (
                 <>
                   <ButtonCustom onClick={() => setShowModal(true)}>
@@ -418,7 +449,6 @@ export default function NavigationBar() {
           </ScrollContainer>
         </FilterPanel>
       )}
-
       <Top>
         <NavButton
           title="Filtro"
