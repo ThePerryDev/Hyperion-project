@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 
 interface Props {
   onClose: () => void;
 }
 
 interface User {
-  id_usuario?: number;
-  nome: string;
+  id?: number; // Adicionado para refletir o backend
+  name: string;
   email: string;
-  senha: string;
+  password: string;
   admin: boolean;
+  isLogged: false;
 }
 
-const API_URL = 'http://localhost:8000/api/v1/usuarios';
+const API_URL = "http://localhost:8000/api/v1/usuarios"; // URL base do backend
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -99,49 +100,53 @@ const Select = styled.select`
 
 const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
   const [user, setUser] = useState<User>({
-    nome: '',
-    email: '',
-    senha: '',
+    name: "",
+    email: "",
+    password: "",
     admin: false,
+    isLogged: false,
   });
 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
+
     setUser((prev) => ({
       ...prev,
-      [name]: name === 'admin' ? value === 'admin' : value,
+      [name]: name === "admin" ? value === "admin" : value,
     }));
   };
 
   const handleSubmit = async () => {
-    if (!user.nome || !user.email || !user.senha) {
-      alert('Preencha todos os campos!');
+    if (!user.name || !user.email || !user.password) {
+      alert("Preencha todos os campos!");
       return;
     }
 
     try {
       const response = await fetch(`${API_URL}/post`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(user),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao cadastrar usuário');
+        throw new Error("Erro ao cadastrar usuário");
       }
 
       const newUser = await response.json();
       setRegisteredUsers([...registeredUsers, newUser]);
-      alert('Usuário cadastrado com sucesso!');
-
-      setUser({ nome: '', email: '', senha: '', admin: false });
+      alert("Usuário cadastrado com sucesso!");
+      // Limpa os campos
+      setUser({ name: "", email: "", password: "", admin: false, isLogged: false });
     } catch (error) {
       console.error(error);
-      alert('Erro ao cadastrar usuário');
+      alert("Erro ao cadastrar usuário");
     }
   };
 
@@ -149,34 +154,34 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     try {
       const response = await fetch(`${API_URL}/getall`);
       if (!response.ok) {
-        throw new Error('Erro ao buscar usuários');
+        throw new Error("Erro ao buscar usuários");
       }
 
       const users = await response.json();
       setRegisteredUsers(users);
     } catch (error) {
       console.error(error);
-      alert('Erro ao carregar usuários');
+      alert("Erro ao carregar usuários");
     }
   };
 
-  const handleDelete = async (id_usuario: number) => {
+  const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`${API_URL}/delete/${id_usuario}`, {
-        method: 'DELETE',
+      const response = await fetch(`${API_URL}/delete/${id}`, {
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao deletar usuário');
+        throw new Error("Erro ao deletar usuário");
       }
 
       setRegisteredUsers(
-        registeredUsers.filter((u) => u.id_usuario !== id_usuario)
+        registeredUsers.filter((u) => u.id !== id)
       );
-      alert('Usuário deletado com sucesso!');
+      alert("Usuário deletado com sucesso!");
     } catch (error) {
       console.error(error);
-      alert('Erro ao deletar usuário');
+      alert("Erro ao deletar usuário");
     }
   };
 
@@ -190,9 +195,9 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
         <div>
           <h2>Cadastrar Funcionário</h2>
           <Input
-            name="nome"
+            name="name"
             placeholder="Nome"
-            value={user.nome}
+            value={user.name}
             onChange={handleChange}
           />
           <Input
@@ -202,17 +207,17 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
             onChange={handleChange}
           />
           <Input
-            name="senha"
+            name="password"
             placeholder="Senha"
             type="password"
-            value={user.senha}
+            value={user.password}
             onChange={handleChange}
           />
           <div>
             <label>Função:</label>
             <Select
               name="admin"
-              value={user.admin ? 'admin' : 'usuario'}
+              value={user.admin ? "admin" : "usuario"}
               onChange={handleChange}
             >
               <option value="usuario">Usuário</option>
@@ -229,11 +234,11 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
           <div>
             <h3>Funcionários cadastrados:</h3>
             {registeredUsers.map((u) => (
-              <UserCard key={u.id_usuario}>
-                <strong>{u.nome}</strong> — {u.admin ? 'Admin' : 'Usuário'}
+              <UserCard key={u.id}>
+                <strong>{u.name}</strong> — {u.admin ? "Admin" : "Usuário"}
                 <br />
                 <small>{u.email}</small>
-                <Button onClick={() => handleDelete(u.id_usuario!)}>
+                <Button onClick={() => handleDelete(u.id!)}>
                   Deletar
                 </Button>
               </UserCard>
