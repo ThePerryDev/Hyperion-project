@@ -16,6 +16,8 @@ import axios from "axios";
 import { useBBox } from "../../context/BBoxContext";
 import ThumbnailViewer from "../ThumbnailViewer/ThumbnailViewer";
 import OverlayManualPanel from "../OverlayManualPanel/OverlayManualPanel";
+import UserRegistrationModal from "../UserRegistrationModal/index";
+import UserListModal from "../UserRegistrationModal/UserListModal";
 
 const NavBar = styled.div`
   position: absolute;
@@ -201,7 +203,7 @@ const ButtonCustom = styled.button`
   border: none;
   border-radius: 25px;
   height: 40px;
-  font-size: 18px;
+  font-size: 15px;
   background-color: #fe5000;
   color: #ffffff;
   font-weight: bold;
@@ -294,6 +296,7 @@ export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [colecoes, setColecoes] = useState<string[]>([]);
   const [selectingBBox, setSelectingBBox] = useState(false);
@@ -315,6 +318,9 @@ export default function NavigationBar() {
     }
   }, [showFilter, showExport, showSettings, showOverlayManual]);
 
+  const [showModal, setShowModal] = useState(false);
+  const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
+
   const [user, setUser] = useState({
     name: "",
     role: "",
@@ -330,16 +336,12 @@ export default function NavigationBar() {
 
   useEffect(() => {
     if (showSettings) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setUser({
-          name: "Ana Souza",
-          role: "admin",
-          email: "ana.souza@email.com",
-          password: "123456",
-        });
-        setIsLoading(false);
-      }, 1500);
+      setUser({
+        name: "Ana Souza",
+        role: "admin", // mude para "user" para testar não-admin
+        email: "ana.souza@email.com",
+        password: "123456",
+      });
     }
   }, [showSettings]);
 
@@ -574,13 +576,24 @@ export default function NavigationBar() {
                       readOnly={user.role !== "admin"}
                     />
                   </InputWrapper>
-                </OptionDiv>
-                {user.role === "admin" && (
-                  <>
-                    <ButtonCustom>Cadastrar Usuários</ButtonCustom>
-                    <ButtonCustom>Editar usuários</ButtonCustom>
-                  </>
-                )}
+                </OptionDiv> {user.role === "admin" && (
+                <>
+                  <ButtonCustom onClick={() => setShowModal(true)}>
+                    Cadastrar Funcionários
+                  </ButtonCustom>
+                  {showModal && (
+                    <UserRegistrationModal
+                      onClose={() => setShowModal(false)}
+                    />
+                  )}
+                  <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>
+                    Editar Funcionários
+                  </ButtonCustom>
+                  {showFuncionariosModal && (
+                    <UserListModal
+                      onClose={() => setShowFuncionariosModal(false)}
+                    />
+                  )}
               </>
             )}
           </ScrollContainer>

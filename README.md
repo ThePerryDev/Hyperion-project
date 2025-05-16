@@ -1,6 +1,8 @@
 <br id="topo">
 
-<p align="center"> <img src="./Imagens_md/BANNER.png" /></p>
+<p align="center">
+  <img src="./Imagens_md/BANNER.png" alt="BANNER" />
+</p>
 
 <p align="center">
     <a href="#sobre">Sobre</a>  |  
@@ -12,6 +14,8 @@
 </p>
 
 <span id="sobre">
+
+<a href="./Imagens_md/README_Daily_06_05_2025.md">Acesse o relatório da Daily Scrum (06/05/2025)</a>
 
 ## :bookmark_tabs: Sobre o projeto
 
@@ -56,8 +60,8 @@ cd backend
 2. Crie e ative o ambiente virtual:
 
 ```bash
-py -m venv ../venv
-../venv/Scripts/activate
+py -m venv venv
+./venv/Scripts/activate
 ```
 
 3. Instale as dependências (estando na pasta `backend`):
