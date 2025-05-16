@@ -1,6 +1,8 @@
 <br id="topo">
 
-<p align="center"> <img src="./Imagens_md/BANNER.png" /></p>
+<p align="center">
+  <img src="./Imagens_md/BANNER.png" alt="Banner" />
+</p>
 
 <p align="center">
     <a href="#sobre">Sobre</a>  |  
