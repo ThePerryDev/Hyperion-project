@@ -142,7 +142,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
       const newUser = await response.json();
       setRegisteredUsers([...registeredUsers, newUser]);
       alert("Usuário cadastrado com sucesso!");
-
       // Limpa os campos
       setUser({ name: "", email: "", password: "", admin: false, isLogged: false });
     } catch (error) {

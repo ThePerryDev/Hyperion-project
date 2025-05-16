@@ -11,11 +11,11 @@ import {
   eyeCloseIcon,
   eyeOpenIcon,
 } from "../../assets";
+import UserListModal from "../UserRegistrationModal/UserListModal";
 import UserRegistrationModal from "../UserRegistrationModal";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
-// Estilos (mesmo que você enviou, sem alterações)
 const NavBar = styled.div`
   position: absolute;
   right: 0rem;
@@ -190,7 +190,6 @@ const InputUser = styled.input`
   padding-right: 40px;
 `;
 
-
 const InputWithIcon = styled(InputCustom)`
   padding-left: 40px;
 `;
@@ -270,6 +269,7 @@ export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -298,14 +298,15 @@ export default function NavigationBar() {
     setShowPassword((prev) => !prev);
   };
 
-  useEffect(() => {
-    if (showSettings) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1500);
-    }
-  }, [showSettings]);
+useEffect(() => {
+  if (showSettings) {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  }
+}, [showSettings]);
+
 
   return (
     <NavBar>
@@ -391,25 +392,23 @@ export default function NavigationBar() {
             <img src={returnIcon} alt="Fechar" />
           </CloseButton>
           <ScrollContainer>
-            {isLoading ? (
-              <p>Carregando...</p>
-            ) : (
-              <>
-                <OptionDiv>
-                  <Options>Nome do funcionário</Options>
-                  <InputUser
-                    value={user?.name ?? ""}
-                    readOnly={user?.admin !== true}
-                  />
-                </OptionDiv>
-                <OptionDiv>
-                  <Options>Email</Options>
-                  <InputUser
-                    value={user?.email ?? ""}
-                    readOnly={user?.admin !== true}
-                  />
-                </OptionDiv>
-{/*
+            <>
+              <OptionDiv>
+                <Options>Nome do funcionário</Options>
+                <InputUser value={user.name} readOnly={user.role !== "admin"} />
+              </OptionDiv>
+              <OptionDiv>
+                <Options>Cargo</Options>
+                <InputUser value={user.role} readOnly />
+              </OptionDiv>
+              <OptionDiv>
+                <Options>Email</Options>
+                <InputUser
+                  value={user.email}
+                  readOnly={user.role !== "admin"}
+                />
+              </OptionDiv>
+              {/*
                 <OptionDiv>
                   <Options>Senha</Options>
                   <InputWrapper>
@@ -427,23 +426,29 @@ export default function NavigationBar() {
                     />
                   </InputWrapper>
                 </OptionDiv>
- */}
-
-                {user?.admin === true && (
-                  <>
-                    <ButtonCustom onClick={() => setShowModal(true)}> Cadastrar Funcionários </ButtonCustom>
-                    {showModal && <UserRegistrationModal onClose={() => setShowModal(false)} />}
-
-                    <ButtonCustom> Editar funcionários </ButtonCustom>
-                  </>
-                )}
-                <ButtonCustom onClick={handleLogout}> SAIR </ButtonCustom>
-              </>
-            )}
+              */}
+              {user.role === "admin" && (
+                <>
+                  <ButtonCustom onClick={() => setShowModal(true)}>
+                    Cadastrar Funcionários
+                  </ButtonCustom>
+                  {showModal && (
+                    <UserRegistrationModal
+                      onClose={() => setShowModal(false)}
+                    />
+                  )}
+                  <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>
+                    Editar Funcionários
+                  </ButtonCustom>
+                  {showFuncionariosModal && (
+                    <UserListModal onClose={() => setShowFuncionariosModal(false)} />
+                  )}
+                </>
+              )}
+            </>
           </ScrollContainer>
         </FilterPanel>
       )}
-
       <Top>
         <NavButton
           title="Filtro"
