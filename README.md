@@ -1,7 +1,7 @@
 <br id="topo">
 
 <p align="center">
-  <img src=".Imagens_md/BANNER.png" alt="BANNER" />
+  <img src="./Imagens_md/BANNER.png" alt="BANNER" />
 </p>
 
 <p align="center">
