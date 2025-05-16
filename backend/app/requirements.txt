@@ -12,6 +12,7 @@ pydantic
 typing
 dotenv
 matplotlib
+cors
 requests
 Pillow
 torch

@@ -12,6 +12,8 @@ import logging
 
 app = FastAPI(title="Monitoramento de Queimadas")
 
+app = FastAPI()
+
 # ✅ Configuração do CORS
 app.add_middleware(
     CORSMiddleware,
@@ -20,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(api_router)
 
 # Criação das tabelas no banco de dados durante a inicialização
 @app.on_event("startup")

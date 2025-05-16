@@ -12,6 +12,10 @@ import {
   eyeOpenIcon,
 } from "../../assets";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { useBBox } from "../../context/BBoxContext";
+import ThumbnailViewer from "../ThumbnailViewer/ThumbnailViewer";
+import OverlayManualPanel from "../OverlayManualPanel/OverlayManualPanel";
 import UserRegistrationModal from "../UserRegistrationModal/index";
 import UserListModal from "../UserRegistrationModal/UserListModal";
 
@@ -217,6 +221,30 @@ const ButtonCustom = styled.button`
   }
 `;
 
+const ButtonCustom2 = styled.button`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 18px;
+  background-color: #fe5000;
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: #e24600;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
 const SelectCustom = styled.select`
   width: 100%;
   padding: 8px 16px;
@@ -268,6 +296,28 @@ export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [colecoes, setColecoes] = useState<string[]>([]);
+  const [selectingBBox, setSelectingBBox] = useState(false);
+  const [colecaoSelecionada, setColecaoSelecionada] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const { polygonPoints, bbox } = useBBox();
+  const [imagensFiltradas, setImagensFiltradas] = useState<any[]>([]);
+  const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [showOverlayManual, setShowOverlayManual] = useState(false);
+
+  useEffect(() => {
+    if (showFilter || showExport || showSettings || showOverlayManual) {
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showFilter, showExport, showSettings, showOverlayManual]);
+
   const [showModal, setShowModal] = useState(false);
   const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
 
@@ -295,40 +345,144 @@ export default function NavigationBar() {
     }
   }, [showSettings]);
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/colecoes-suportadas")
+      .then((res) => {
+        const nomes = res.data.map((colecao: { id: string }) => colecao.id);
+        setColecoes(nomes);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar coleções:", err);
+      });
+  }, []);
+
+  const aplicarFiltros = async () => {
+    if (!bbox || !colecaoSelecionada || !dataInicio || !dataFim) {
+      alert("Preencha todos os campos antes de aplicar os filtros.");
+      return;
+    }
+
+    const payload = {
+      bbox: bbox.join(","),
+      colecao: colecaoSelecionada,
+      data_inicio: dataInicio,
+      data_fim: dataFim,
+      filtrar_nuvens: false,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/buscar-imagens",
+        payload
+      );
+      setImagensFiltradas(response.data.dados);
+      setMostrarResultados(true);
+    } catch (error) {
+      console.error("Erro ao buscar imagens:", error);
+      alert("Erro ao buscar imagens. Veja o console para mais detalhes.");
+    }
+  };
+
   return (
     <NavBar>
-      {showFilter && (
-        <FilterPanel>
-          <CloseButton onClick={() => setShowFilter(false)}>
-            <img src={returnIcon} alt="Voltar" />
-          </CloseButton>
-          <ScrollContainer>
-            <h3>Localizar</h3>
-            <InputWrapper>
-              <SearchIcon src={searchIcon} alt="Buscar" />
-              <InputWithIcon type="text" placeholder="Buscar..." />
-            </InputWrapper>
-            <ButtonCustom>Selecionar Área</ButtonCustom>
-            <OptionDiv>
-              <Options>Coleção Satelite</Options>
-              <SelectCustom defaultValue="">
-                <option value="" disabled hidden>
-                  Selecione...
-                </option>
-                <option value="sentinel">placeholder</option>
-              </SelectCustom>
-            </OptionDiv>
-            <OptionDiv>
-              <Options>Data Início (UTC)</Options>
-              <InputCustom type="date" />
-            </OptionDiv>
-            <OptionDiv>
-              <Options>Data Fim (UTC)</Options>
-              <InputCustom type="date" />
-            </OptionDiv>
-          </ScrollContainer>
-        </FilterPanel>
+      {showOverlayManual && (
+        <OverlayManualPanel
+          onClose={() => {
+            setShowOverlayManual(false);
+          }}
+        />
       )}
+      {showFilter &&
+        (mostrarResultados ? (
+          <ThumbnailViewer
+            imagens={imagensFiltradas}
+            onClose={() => {
+              setMostrarResultados(false);
+              setShowFilter(true);
+            }}
+          />
+        ) : (
+          <FilterPanel>
+            <CloseButton onClick={() => setShowFilter(false)}>
+              <img src={returnIcon} alt="Voltar" />
+            </CloseButton>
+            <ScrollContainer>
+              <h3>Localizar</h3>
+              <InputWrapper>
+                <SearchIcon src={searchIcon} alt="Buscar" />
+                <InputWithIcon type="text" placeholder="Buscar cidade" />
+              </InputWrapper>
+
+              {!selectingBBox && polygonPoints.length < 4 && (
+                <ButtonCustom
+                  onClick={() => {
+                    setShowFilter(false);
+                    setSelectingBBox(true);
+                  }}
+                >
+                  Selecionar Área
+                </ButtonCustom>
+              )}
+
+              {bbox && (
+                <>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[0]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[1]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[2]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[3]} readOnly />
+                  </OptionDiv>
+                </>
+              )}
+
+              <OptionDiv>
+                <Options>Coleção/Satelite</Options>
+                <SelectCustom
+                  value={colecaoSelecionada}
+                  onChange={(e) => setColecaoSelecionada(e.target.value)}
+                >
+                  <option value="" disabled hidden>
+                    Selecione a Coleção
+                  </option>
+                  {colecoes.map((colecaoId) => (
+                    <option key={colecaoId} value={colecaoId}>
+                      {colecaoId}
+                    </option>
+                  ))}
+                </SelectCustom>
+              </OptionDiv>
+
+              <OptionDiv>
+                <Options>Data Início (UTC)</Options>
+                <InputCustom
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                />
+              </OptionDiv>
+
+              <OptionDiv>
+                <Options>Data Fim (UTC)</Options>
+                <InputCustom
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                />
+              </OptionDiv>
+            </ScrollContainer>
+            <ButtonCustom2 onClick={aplicarFiltros}>
+              Aplicar Filtros
+            </ButtonCustom2>
+          </FilterPanel>
+        ))}
+
       {showExport && (
         <FilterPanel>
           <CloseButton onClick={() => setShowExport(false)}>
@@ -352,13 +506,18 @@ export default function NavigationBar() {
             <OptionDiv>
               <InputCustom2 placeholder="Limite Direito Inferior" />
             </OptionDiv>
+
             <OptionDiv>
-              <Options>Coleção (Satélite)</Options>
+              <Options>Coleção/Satelite</Options>
               <SelectCustom defaultValue="">
                 <option value="" disabled hidden>
-                  Selecione...
+                  Selecione a Coleção
                 </option>
-                <option value="sentinel">placeholder</option>
+                {colecoes.map((colecaoId) => (
+                  <option key={colecaoId} value={colecaoId}>
+                    {colecaoId}
+                  </option>
+                ))}
               </SelectCustom>
             </OptionDiv>
             <OptionDiv>
@@ -373,30 +532,51 @@ export default function NavigationBar() {
           </ScrollContainer>
         </FilterPanel>
       )}
+
       {showSettings && (
         <FilterPanel>
           <CloseButton onClick={() => setShowSettings(false)}>
             <img src={returnIcon} alt="Fechar" />
           </CloseButton>
           <ScrollContainer>
-            <>
-              <OptionDiv>
-                <Options>Nome do funcionário</Options>
-                <InputUser value={user.name} readOnly={user.role !== "admin"} />
-              </OptionDiv>
-              <OptionDiv>
-                <Options>Cargo</Options>
-                <InputUser value={user.role} readOnly />
-              </OptionDiv>
-              <OptionDiv>
-                <Options>Email</Options>
-                <InputUser
-                  value={user.email}
-                  readOnly={user.role !== "admin"}
-                />
-              </OptionDiv>
-
-              {user.role === "admin" && (
+            {isLoading ? (
+              <p>Carregando...</p>
+            ) : (
+              <>
+                <OptionDiv>
+                  <Options>Nome do funcionário</Options>
+                  <InputUser
+                    value={user.name}
+                    readOnly={user.role !== "admin"}
+                  />
+                </OptionDiv>
+                <OptionDiv>
+                  <Options>Cargo</Options>
+                  <InputUser value={user.role} readOnly />
+                </OptionDiv>
+                <OptionDiv>
+                  <Options>Email</Options>
+                  <InputUser
+                    value={user.email}
+                    readOnly={user.role !== "admin"}
+                  />
+                </OptionDiv>
+                <OptionDiv>
+                  <Options>Senha</Options>
+                  <InputWrapper>
+                    <EyeButton onClick={togglePasswordVisibility}>
+                      <img
+                        src={showPassword ? eyeOpenIcon : eyeCloseIcon}
+                        alt="Mostrar senha"
+                      />
+                    </EyeButton>
+                    <InputUser
+                      type={showPassword ? "text" : "password"}
+                      value={user.password}
+                      readOnly={user.role !== "admin"}
+                    />
+                  </InputWrapper>
+                </OptionDiv> {user.role === "admin" && (
                 <>
                   <ButtonCustom onClick={() => setShowModal(true)}>
                     Cadastrar Funcionários
@@ -414,13 +594,11 @@ export default function NavigationBar() {
                       onClose={() => setShowFuncionariosModal(false)}
                     />
                   )}
-                </>
-              )}
-            </>
+              </>
+            )}
           </ScrollContainer>
         </FilterPanel>
       )}
-
       <Top>
         <NavButton
           title="Filtro"
@@ -429,6 +607,7 @@ export default function NavigationBar() {
               if (!prev) {
                 setShowExport(false);
                 setShowSettings(false);
+                setShowOverlayManual(false);
               }
               return !prev;
             });
@@ -443,12 +622,28 @@ export default function NavigationBar() {
               if (!prev) {
                 setShowFilter(false);
                 setShowSettings(false);
+                setShowOverlayManual(false);
               }
               return !prev;
             });
           }}
         >
           <img src={showExport ? openExportIcon : exportIcon} alt="Export" />
+        </NavButton>
+        <NavButton
+          title="Overlay Manual"
+          onClick={() => {
+            setShowOverlayManual((prev) => {
+              if (!prev) {
+                setShowFilter(false);
+                setShowExport(false);
+                setShowSettings(false);
+              }
+              return !prev;
+            });
+          }}
+        >
+          <img src={showOverlayManual ? openExportIcon : exportIcon} alt="Overlay Manual" />
         </NavButton>
       </Top>
       <Bottom>
