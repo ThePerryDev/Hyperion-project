@@ -1,41 +1,68 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
 from app.routes.api import router as api_router
 from app.routes import stac_routes
-from app.core.database import engine, Base
 from app.routes.usuario_route import router as usuario_router
 from app.routes.ml_routes import router as ml_router
 from app.routes.output_routes import router as output_router
+from app.core.database import engine, Base
+from app.controllers.usuario_controller import UsuarioController
 from app.schemas.tb_consulta import create_tables
-from fastapi.middleware.cors import CORSMiddleware
+from app.models.usuario_model import Usuario  # 👈 garante que a tabela será criada
 import logging
 
-app = FastAPI(title="Monitoramento de Queimadas")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logging.info("🚀 Iniciando aplicação...")
 
-app = FastAPI()
+    # Etapa 1: Criar todas as tabelas
+    logging.info("🛠️ Criando tabelas...")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-# ✅ Configuração do CORS
+    # Etapa 2: Criar outras tabelas adicionais (como tb_consulta)
+    await create_tables()
+    logging.info("✅ Tabelas criadas com sucesso.")
+
+    # Etapa 3: Verificar se o admin já existe
+    try:
+        usuario_controller = UsuarioController()
+        usuarios = await usuario_controller.buscar_usuarios()
+
+        admin_existe = any(u.email == "admin" for u in usuarios)
+
+        if not admin_existe:
+            await usuario_controller.criar_usuario(
+                name="Administrador",
+                email="admin",
+                password="admin",  # ⚠️ usar apenas para ambiente de desenvolvimento
+                admin=True,
+                isLogged=False
+            )
+            logging.info("✅ Usuário admin criado com sucesso.")
+        else:
+            logging.info("ℹ️ Usuário admin já existe.")
+
+    except Exception as e:
+        logging.error(f"❌ Erro ao verificar/criar usuário admin: {e}")
+
+    yield  # A aplicação inicia aqui
+
+    logging.info("🛑 Encerrando aplicação.")
+
+# FastAPI App
+app = FastAPI(title="Monitoramento de Queimadas", lifespan=lifespan)
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # ou ["*"] para liberar geral em desenvolvimento
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(api_router)
-
-# Criação das tabelas no banco de dados durante a inicialização
-@app.on_event("startup")
-async def startup_event():
-    logging.info("Iniciando a criação das tabelas...")
-    # Criando as tabelas do banco de dados
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logging.info("Tabelas criadas com sucesso!")
-
-    # Também chama a função para criar as tabelas relacionadas a consultas
-    await create_tables()
 
 # Incluindo as rotas no aplicativo FastAPI
 app.include_router(api_router)

@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { LoginSld, InputSld } from "./styles";
+import { useNavigate } from "react-router-dom";
 import { hyperio_logo, user_icon, password_icon } from "../../assets";
 import { AuthContext } from "../../context/AuthContext";
+import { InputSld, LoginSld } from "./styles";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -51,10 +51,6 @@ export default function Login() {
         </InputSld>
 
         <button onClick={handleLogin}> ENTRAR</button>
-
-        <Link id="navigate" to="/registro">
-          Registre-se
-        </Link>
       </form>
     </LoginSld>
   );

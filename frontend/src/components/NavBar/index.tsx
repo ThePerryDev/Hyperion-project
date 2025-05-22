@@ -296,8 +296,6 @@ export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(false);
   const [colecoes, setColecoes] = useState<string[]>([]);
   const [selectingBBox, setSelectingBBox] = useState(false);
   const [colecaoSelecionada, setColecaoSelecionada] = useState("");
@@ -307,16 +305,6 @@ export default function NavigationBar() {
   const [imagensFiltradas, setImagensFiltradas] = useState<any[]>([]);
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [showOverlayManual, setShowOverlayManual] = useState(false);
-
-  useEffect(() => {
-    if (showFilter || showExport || showSettings || showOverlayManual) {
-      setIsLoading(true);
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [showFilter, showExport, showSettings, showOverlayManual]);
 
   const [showModal, setShowModal] = useState(false);
   const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
@@ -539,9 +527,6 @@ export default function NavigationBar() {
             <img src={returnIcon} alt="Fechar" />
           </CloseButton>
           <ScrollContainer>
-            {isLoading ? (
-              <p>Carregando...</p>
-            ) : (
               <>
                 <OptionDiv>
                   <Options>Nome do funcionário</Options>
@@ -576,26 +561,30 @@ export default function NavigationBar() {
                       readOnly={user.role !== "admin"}
                     />
                   </InputWrapper>
-                </OptionDiv> {user.role === "admin" && (
-                <>
-                  <ButtonCustom onClick={() => setShowModal(true)}>
-                    Cadastrar Funcionários
-                  </ButtonCustom>
-                  {showModal && (
-                    <UserRegistrationModal
-                      onClose={() => setShowModal(false)}
-                    />
-                  )}
-                  <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>
-                    Editar Funcionários
-                  </ButtonCustom>
-                  {showFuncionariosModal && (
-                    <UserListModal
-                      onClose={() => setShowFuncionariosModal(false)}
-                    />
-                  )}
+                </OptionDiv>
+                {user.role === "admin" && (
+                  <>
+                    <ButtonCustom onClick={() => setShowModal(true)}>
+                      Cadastrar Funcionários
+                    </ButtonCustom>
+                    {showModal && (
+                      <UserRegistrationModal
+                        onClose={() => setShowModal(false)}
+                      />
+                    )}
+                    <ButtonCustom
+                      onClick={() => setShowFuncionariosModal(true)}
+                    >
+                      Editar Funcionários
+                    </ButtonCustom>
+                    {showFuncionariosModal && (
+                      <UserListModal
+                        onClose={() => setShowFuncionariosModal(false)}
+                      />
+                    )}
+                  </>
+                )}
               </>
-            )}
           </ScrollContainer>
         </FilterPanel>
       )}
@@ -643,7 +632,10 @@ export default function NavigationBar() {
             });
           }}
         >
-          <img src={showOverlayManual ? openExportIcon : exportIcon} alt="Overlay Manual" />
+          <img
+            src={showOverlayManual ? openExportIcon : exportIcon}
+            alt="Overlay Manual"
+          />
         </NavButton>
       </Top>
       <Bottom>
