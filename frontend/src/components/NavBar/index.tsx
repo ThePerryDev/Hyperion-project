@@ -10,6 +10,8 @@ import {
   openSettingsIcon,
   eyeCloseIcon,
   eyeOpenIcon,
+  overlayIcon,
+  openOverlayIcon
 } from "../../assets";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -633,7 +635,7 @@ export default function NavigationBar() {
           }}
         >
           <img
-            src={showOverlayManual ? openExportIcon : exportIcon}
+            src={showOverlayManual ? openOverlayIcon : overlayIcon}
             alt="Overlay Manual"
           />
         </NavButton>
@@ -646,6 +648,7 @@ export default function NavigationBar() {
               if (!prev) {
                 setShowFilter(false);
                 setShowExport(false);
+                setShowOverlayManual(false);
               }
               return !prev;
             });

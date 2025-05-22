@@ -13,5 +13,7 @@ import hyperio_logo from "./img/hyperion_login_logo.png"
 import login_background from "./img/login_background.png"
 import password_icon from "./img/password_login_icon.png"
 import user_icon from "./img/user_login_icon.png"
+import openOverlayIcon from "./openOverlayIcon.png";
+import overlayIcon from "./overlayIcon.png";
 
-export { exportIcon, hyperionLogo, mapIcon, openExportIcon, opemMapIcon, returnIcon, searchIcon, settings, openSettingsIcon, eyeCloseIcon, eyeOpenIcon, hyperio_logo, login_background, password_icon, user_icon }
+export { exportIcon, hyperionLogo, mapIcon, openExportIcon, opemMapIcon, returnIcon, searchIcon, settings, openSettingsIcon, eyeCloseIcon, eyeOpenIcon, hyperio_logo, login_background, password_icon, user_icon, openOverlayIcon, overlayIcon };
