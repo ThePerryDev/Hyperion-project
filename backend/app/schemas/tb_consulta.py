@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import engine  # O engine assíncrono configurado
 from datetime import date
+from sqlalchemy import Float
 
 # Define o modelo da tabela tb_consultas
 Base = declarative_base()
@@ -19,7 +20,7 @@ class Consulta(Base):
     cmask = Column(String, nullable=True)
     thumbnail = Column(String, nullable=True)
     data = Column(Date, nullable=False, default=date.today)
-    cobertura_nuvem = Column(String, nullable=True)
+    cobertura_nuvem = Column(Float, nullable=True)
     bbox = Column(JSON, nullable=True)  # Usando JSON para armazenar o array "bbox"
     bandas = Column(JSON, nullable=True)  # Usando JSON para armazenar o dicionário "bandas"
 

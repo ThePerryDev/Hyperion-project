@@ -3,7 +3,6 @@ from app.core.database import Base
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
-    
     id = Column(Integer, primary_key=True, autoincrement=True)  
     name = Column(String(255), nullable=False)  
     email = Column(String(255), unique=True, nullable=False)
