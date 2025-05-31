@@ -1,0 +1,26 @@
+# Manipulação de dados geoespaciais
+rasterio
+pystac-client
+
+# NumPy & Ciência de dados
+numpy
+scikit-image
+pandas
+
+# Download e progresso
+requests
+tqdm
+
+# PyTorch & Deep Learning
+torch
+torchvision
+segmentation-models-pytorch
+
+# Aumentação e pré-processamento de imagens
+albumentations
+
+# Visualização
+matplotlib
+
+# Imagens e PIL
+Pillow
