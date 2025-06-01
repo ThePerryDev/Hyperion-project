@@ -8,16 +8,17 @@ import {
   searchIcon,
   settings,
   openSettingsIcon,
-  eyeCloseIcon,
-  eyeOpenIcon,
+  overlayIcon,
+  openOverlayIcon,
 } from "../../assets";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useBBox } from "../../context/BBoxContext";
 import ThumbnailViewer from "../ThumbnailViewer/ThumbnailViewer";
 import OverlayManualPanel from "../OverlayManualPanel/OverlayManualPanel";
 import UserRegistrationModal from "../UserRegistrationModal/index";
 import UserListModal from "../UserRegistrationModal/UserListModal";
+import { AuthContext } from "../../context/AuthContext";
 
 const NavBar = styled.div`
   position: absolute;
@@ -305,33 +306,9 @@ export default function NavigationBar() {
   const [imagensFiltradas, setImagensFiltradas] = useState<any[]>([]);
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [showOverlayManual, setShowOverlayManual] = useState(false);
-
   const [showModal, setShowModal] = useState(false);
   const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
-
-  const [user, setUser] = useState({
-    name: "",
-    role: "",
-    email: "",
-    password: "",
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  useEffect(() => {
-    if (showSettings) {
-      setUser({
-        name: "Ana Souza",
-        role: "admin", // mude para "user" para testar não-admin
-        email: "ana.souza@email.com",
-        password: "123456",
-      });
-    }
-  }, [showSettings]);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     axios
@@ -527,64 +504,46 @@ export default function NavigationBar() {
             <img src={returnIcon} alt="Fechar" />
           </CloseButton>
           <ScrollContainer>
-              <>
-                <OptionDiv>
-                  <Options>Nome do funcionário</Options>
-                  <InputUser
-                    value={user.name}
-                    readOnly={user.role !== "admin"}
-                  />
-                </OptionDiv>
-                <OptionDiv>
-                  <Options>Cargo</Options>
-                  <InputUser value={user.role} readOnly />
-                </OptionDiv>
-                <OptionDiv>
-                  <Options>Email</Options>
-                  <InputUser
-                    value={user.email}
-                    readOnly={user.role !== "admin"}
-                  />
-                </OptionDiv>
-                <OptionDiv>
-                  <Options>Senha</Options>
-                  <InputWrapper>
-                    <EyeButton onClick={togglePasswordVisibility}>
-                      <img
-                        src={showPassword ? eyeOpenIcon : eyeCloseIcon}
-                        alt="Mostrar senha"
-                      />
-                    </EyeButton>
-                    <InputUser
-                      type={showPassword ? "text" : "password"}
-                      value={user.password}
-                      readOnly={user.role !== "admin"}
+            <>
+              <OptionDiv>
+                <Options>Nome do funcionário</Options>
+                <InputUser value={user?.name} readOnly={user?.admin !== true} />
+              </OptionDiv>
+              <OptionDiv>
+                <Options>Cargo</Options>
+                <InputUser
+                  value={user?.admin ? "administrador" : "usuário"}
+                  readOnly
+                />
+              </OptionDiv>
+              <OptionDiv>
+                <Options>Email</Options>
+                <InputUser
+                  value={user?.email}
+                  readOnly={user?.admin !== true}
+                />
+              </OptionDiv>
+              {user?.admin === true && (
+                <>
+                  <ButtonCustom onClick={() => setShowModal(true)}>
+                    Cadastrar Funcionários
+                  </ButtonCustom>
+                  {showModal && (
+                    <UserRegistrationModal
+                      onClose={() => setShowModal(false)}
                     />
-                  </InputWrapper>
-                </OptionDiv>
-                {user.role === "admin" && (
-                  <>
-                    <ButtonCustom onClick={() => setShowModal(true)}>
-                      Cadastrar Funcionários
-                    </ButtonCustom>
-                    {showModal && (
-                      <UserRegistrationModal
-                        onClose={() => setShowModal(false)}
-                      />
-                    )}
-                    <ButtonCustom
-                      onClick={() => setShowFuncionariosModal(true)}
-                    >
-                      Editar Funcionários
-                    </ButtonCustom>
-                    {showFuncionariosModal && (
-                      <UserListModal
-                        onClose={() => setShowFuncionariosModal(false)}
-                      />
-                    )}
-                  </>
-                )}
-              </>
+                  )}
+                  <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>
+                    Editar Funcionários
+                  </ButtonCustom>
+                  {showFuncionariosModal && (
+                    <UserListModal
+                      onClose={() => setShowFuncionariosModal(false)}
+                    />
+                  )}
+                </>
+              )}
+            </>
           </ScrollContainer>
         </FilterPanel>
       )}
@@ -633,7 +592,7 @@ export default function NavigationBar() {
           }}
         >
           <img
-            src={showOverlayManual ? openExportIcon : exportIcon}
+            src={showOverlayManual ? openOverlayIcon : overlayIcon}
             alt="Overlay Manual"
           />
         </NavButton>
@@ -646,6 +605,7 @@ export default function NavigationBar() {
               if (!prev) {
                 setShowFilter(false);
                 setShowExport(false);
+                setShowOverlayManual(false);
               }
               return !prev;
             });

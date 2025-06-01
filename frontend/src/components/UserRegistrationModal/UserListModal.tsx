@@ -191,36 +191,6 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
                     <small>Email: {user.email}</small>
                   </p>
 
-                  <OptionDiv>
-                    <Options>Senha</Options>
-                    <InputWrapper>
-                      <EyeButton
-                        onClick={() =>
-                          togglePasswordVisibility(user.id!)
-                        }
-                      >
-                        <img
-                          src={
-                            showPasswordId === user.id
-                              ? eyeOpenIcon
-                              : eyeCloseIcon
-                          }
-                          alt="Mostrar senha"
-                        />
-                      </EyeButton>
-
-                      <InputUser
-                        type={
-                          showPasswordId === user.id
-                            ? "text"
-                            : "password"
-                        }
-                        value={user.senha}
-                        readOnly
-                      />
-                    </InputWrapper>
-                  </OptionDiv>
-
                   <div style={{ marginTop: "0.5rem" }}>
                     <Button onClick={() => setEditingUser(user)}>Editar</Button>
                     <Button

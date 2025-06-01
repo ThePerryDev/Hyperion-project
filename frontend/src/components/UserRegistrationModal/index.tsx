@@ -229,22 +229,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
             <Button onClick={onClose}>Fechar</Button>
           </div>
         </div>
-
-        {registeredUsers.length > 0 && (
-          <div>
-            <h3>Funcionários cadastrados:</h3>
-            {registeredUsers.map((u) => (
-              <UserCard key={u.id}>
-                <strong>{u.name}</strong> — {u.admin ? "Admin" : "Usuário"}
-                <br />
-                <small>{u.email}</small>
-                <Button onClick={() => handleDelete(u.id!)}>
-                  Deletar
-                </Button>
-              </UserCard>
-            ))}
-          </div>
-        )}
       </ModalContent>
     </ModalOverlay>
   );
