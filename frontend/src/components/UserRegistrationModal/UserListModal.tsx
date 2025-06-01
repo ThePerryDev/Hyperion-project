@@ -8,13 +8,12 @@ interface Props {
 }
 
 interface User {
-    id?: number;
-    name: string;
-    email: string;
-    admin: boolean;
-    senha: string;
-  }
-  
+  id?: number;
+  name: string;
+  email: string;
+  admin: boolean;
+  senha: string;
+}
 
 const API_URL = "http://localhost:8000/api/v1/usuarios";
 
@@ -47,11 +46,15 @@ const Title = styled.h2`
 `;
 
 const UserListContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: row;
   gap: 1rem;
   max-height: 500px;
   overflow-y: auto;
+
+  @media (min-width: 300px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const UserCard = styled.div`
@@ -59,8 +62,41 @@ const UserCard = styled.div`
   padding: 1rem;
   border-radius: 8px;
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 1rem;
+
+  @media (max-width: 370px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+const InfoText = styled.p`
+  margin: 0;
+  word-break: break-word;
+  white-space: normal;
+`;
+
+const InfoGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-self: center;
+
+  @media (min-width: 500px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const Button = styled.button<{ color?: string }>`
@@ -93,50 +129,9 @@ const ButtonClose = styled.button`
   }
 `;
 
-const OptionDiv = styled.div`
-  margin-top: 0.5rem;
-`;
-
-const Options = styled.label`
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  display: block;
-`;
-
-const InputWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  position: relative;
-`;
-
-const InputUser = styled.input`
-  padding: 6px 30px 6px 10px;
-  flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-`;
-
-const EyeButton = styled.button`
-  position: absolute;
-  right: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-
-  img {
-    width: 20px;
-    height: 20px;
-  }
-`;
-
 const UserListModal: React.FC<Props> = ({ onClose }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [showPasswordId, setShowPasswordId] = useState<number | null>(null);
-
-  const togglePasswordVisibility = (id: number) => {
-    setShowPasswordId((prev) => (prev === id ? null : id));
-  };
 
   const fetchUsers = async () => {
     try {
@@ -183,23 +178,22 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
             <UserListContainer>
               {users.map((user) => (
                 <UserCard key={user.id}>
-                  <p>
-                    <strong>Nome: {user.name}</strong> —{" "}
-                    {user.admin ? "Admin" : "Usuário"}
-                  </p>
-                  <p>
-                    <small>Email: {user.email}</small>
-                  </p>
+                  <InfoGroup>
+                    <InfoText>
+                      <strong>Nome: {user.name}</strong> — Cargo:{" "}
+                      {user.admin ? "Admin" : "Usuário"}
+                    </InfoText>
+                    <InfoText>
+                      <small>Email: {user.email}</small>
+                    </InfoText>
+                  </InfoGroup>
 
-                  <div style={{ marginTop: "0.5rem" }}>
+                  <ButtonGroup>
                     <Button onClick={() => setEditingUser(user)}>Editar</Button>
-                    <Button
-                      color="red"
-                      onClick={() => handleDelete(user.id!)}
-                    >
+                    <Button color="red" onClick={() => handleDelete(user.id!)}>
                       Excluir
                     </Button>
-                  </div>
+                  </ButtonGroup>
                 </UserCard>
               ))}
             </UserListContainer>

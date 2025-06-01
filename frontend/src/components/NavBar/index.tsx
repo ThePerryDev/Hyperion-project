@@ -19,6 +19,7 @@ import OverlayManualPanel from "../OverlayManualPanel/OverlayManualPanel";
 import UserRegistrationModal from "../UserRegistrationModal/index";
 import UserListModal from "../UserRegistrationModal/UserListModal";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = styled.div`
   position: absolute;
@@ -221,6 +222,30 @@ const ButtonCustom = styled.button`
     transform: scale(0.98);
   }
 `;
+const ButtonLogout = styled.button`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  font-size: 15px;
+  background-color: #fe5000;
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 50%;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: #e24600;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
 
 const ButtonCustom2 = styled.button`
   width: 100%;
@@ -277,22 +302,6 @@ const Options = styled.label`
   letter-spacing: 1px;
 `;
 
-const EyeButton = styled.button`
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-
-  img {
-    width: 20px;
-    height: 20px;
-  }
-`;
-
 export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -309,6 +318,13 @@ export default function NavigationBar() {
   const [showModal, setShowModal] = useState(false);
   const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const auth = useContext(AuthContext);
+
+  const handleLogout = () => {
+    auth.signout();
+    navigate("/login");
+  };
 
   useEffect(() => {
     axios
@@ -543,6 +559,7 @@ export default function NavigationBar() {
                   )}
                 </>
               )}
+              <ButtonLogout onClick={handleLogout}>Logout</ButtonLogout>
             </>
           </ScrollContainer>
         </FilterPanel>
