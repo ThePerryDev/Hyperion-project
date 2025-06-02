@@ -165,26 +165,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`${API_URL}/delete/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao deletar usuário");
-      }
-
-      setRegisteredUsers(
-        registeredUsers.filter((u) => u.id !== id)
-      );
-      alert("Usuário deletado com sucesso!");
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao deletar usuário");
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
