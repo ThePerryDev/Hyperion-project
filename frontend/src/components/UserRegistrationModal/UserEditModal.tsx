@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 
 interface Props {
   user: User;
@@ -59,11 +58,10 @@ const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
   const [email, setEmail] = useState(user.email);
   const [admin, setAdmin] = useState(user.admin);
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleEditSubmit = async () => {
     if (!user.id) {
-      console.error("ID do usuário não encontrado.");
+      alert("ID do usuário não encontrado.");
       return;
     }
 
@@ -73,9 +71,6 @@ const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
       admin,
       password,
     };
-
-    // Navegar para a tela anterior imediatamente após clicar no "Salvar"
-    navigate(-1);
 
     try {
       const response = await fetch(`${API_URL}/put/${user.id}`, {
@@ -92,10 +87,12 @@ const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
         throw new Error("Erro ao atualizar usuário");
       }
 
+      alert("Usuário atualizado com sucesso!");
       if (onSaveSuccess) onSaveSuccess();
       onCancel();
     } catch (error: any) {
-      console.error(error.message || "Erro ao atualizar usuário");
+      alert(error.message || "Erro ao atualizar usuário");
+      console.error(error);
     }
   };
 
