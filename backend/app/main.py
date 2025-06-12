@@ -8,9 +8,12 @@ from app.routes.usuario_route import router as usuario_router
 from app.routes.ml_routes import router as ml_router
 from app.routes.output_routes import router as output_router
 from app.core.database import engine, Base
+from app.routes.websocket_endpoint import router as websocket_router
+from app.utils.cancel_instance import cancel_manager
 from app.controllers.usuario_controller import UsuarioController
 from app.schemas.tb_consulta import create_tables
-from app.models.usuario_model import Usuario  # 👈 garante que a tabela será criada
+from app.models.usuario_model import Usuario
+from app.utils.cancel_instance import cancel_manager
 import logging
 
 @asynccontextmanager
@@ -58,7 +61,7 @@ app = FastAPI(title="Monitoramento de Queimadas", lifespan=lifespan)
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -79,4 +82,9 @@ app.include_router(ml_router)
 #Rota para /processed-list e /bbox-from-tif
 app.include_router(output_router)
 
+#Rota para websocket
+app.include_router(websocket_router)
+
 app.mount("/output", StaticFiles(directory="output"), name="output")
+
+_all_ = ["cancel_manager"]
