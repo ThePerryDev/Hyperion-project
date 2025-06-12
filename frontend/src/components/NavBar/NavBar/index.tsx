@@ -26,9 +26,41 @@ export default function NavigationBar() {
   const [showOverlayManual, setShowOverlayManual] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
 
+  //Mock de resultados, excluir quando estiver comunicando com o backend
+  const imagensProcessadasMock = [
+    {
+      id: "CBERS_4A_WFI_20240830_202_140",
+      bbox: [-45.123, -12.345, -44.678, -11.890],
+      colecao: "CBERS_4A_WFI",
+      data: "2024-08-30",
+      bandas: {
+        Verde: "http://localhost:8000/downloads/band_verde.tif",
+        Azul: "http://localhost:8000/downloads/band_azul.tif",
+        Vermelho: "http://localhost:8000/downloads/band_vermelho.tif",
+        NIR: "http://localhost:8000/downloads/band_nir.tif",
+      },
+      ndviUrl: "http://localhost:8000/downloads/ndvi.png",
+      processadaUrl: "http://localhost:8000/downloads/segmentada.png",
+    },
+    {
+      id: "AMAZONIA_1_WFI_20240831_203_141",
+      bbox: [-55.123, -5.123, -54.456, -4.789],
+      colecao: "AMAZONIA_1_WFI",
+      data: "2024-08-31",
+      bandas: {
+        Verde: "http://localhost:8000/downloads/verde_amz.tif",
+        Azul: "http://localhost:8000/downloads/azul_amz.tif",
+        Vermelho: "http://localhost:8000/downloads/vermelho_amz.tif",
+        NIR: "http://localhost:8000/downloads/nir_amz.tif",
+      },
+      ndviUrl: "http://localhost:8000/downloads/ndvi_amz.png",
+      processadaUrl: "http://localhost:8000/downloads/segmentada_amz.png",
+    },
+  ];
+  
   return (
     <NavBar>
-      {showExport && <ExportPanel onClose={() => setShowExport(false)} />}
+      {showExport && <ExportPanel imagens={imagensProcessadasMock} onClose={() => setShowExport(false)} />}
       {showFilter && <FilterPanel onClose={() => setShowFilter(false)} />}
       {showOverlayManual && (
         <OverlayManualPanel onClose={() => setShowOverlayManual(false)} />

@@ -1,24 +1,16 @@
 import styled from "styled-components";
 
-export const BotaoExportar = styled.button`
-  width: 90%;
-  padding: 10px;
-  border: none;
-  border-radius: 25px;
-  font-size: 15px;
-  background-color: #fe5000;
-  color: #ffffff;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+export const Title = styled.h3`
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  color: #333;
+  text-align: center;
+`;
 
-  &:hover {
-    background-color: #e24600;
-    transform: scale(1.02);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
+export const ImageCountText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  text-align: center;
 `;

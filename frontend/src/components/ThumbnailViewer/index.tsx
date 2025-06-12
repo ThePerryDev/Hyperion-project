@@ -1,7 +1,9 @@
-import { useBBox } from "../../context/BBoxContext";
-import { CloseButton, ScrollContainer } from "..";
+import { Title, ImageCountText} from "./styles";
 import LargePanel from "./LargePanel";
 import ImageCard from "./ImageCard";
+import { CloseButton, ScrollContainer } from "..";
+import { formatarData } from "../../utils/imageUtils";
+import { useImageHandlers } from "../../hooks/useImageHandlers";
 
 interface ThumbnailViewerProps {
   imagens: {
@@ -18,47 +20,28 @@ interface ThumbnailViewerProps {
   onClose: () => void;
 }
 
-export default function ThumbnailViewer({
-  imagens,
-  onClose,
-}: ThumbnailViewerProps) {
-  const {
-    imagemThumbnail,
-    setImagemThumbnail,
-    setMostrarThumbnail,
-    setImagemProcessada,
-    setMostrarProcessada,
-  } = useBBox();
-
-  const handleSelecionarImagem = (img: {
-    id: string;
-    thumbnail: string;
-    bbox?: number[];
-  }) => {
-    if (img.bbox) {
-      setImagemThumbnail({
-        id: img.id,
-        thumbnail: img.thumbnail,
-        bbox: img.bbox,
-      });
-      setMostrarThumbnail(true);
-    } else {
-      alert("Imagem sem BBOX disponível para visualização.");
-    }
-  };
+export default function ThumbnailViewer({ imagens, onClose }: ThumbnailViewerProps) {
+  const { imagemThumbnail, handleSelecionarImagem, handleProcessarImagem } = useImageHandlers();
 
   return (
     <LargePanel>
       <CloseButton onClick={onClose} />
       <ScrollContainer>
+        <Title>Resultados da Busca</Title>
+        <ImageCountText>{imagens.length} imagens encontradas</ImageCountText>
+
         {imagens.map((img) => (
           <ImageCard
             key={img.id}
             id={img.id}
+            thumbnail={img.thumbnail}
             bbox={img.bbox}
             colecao={img.colecao}
-            data={img.data}
-            onExport={() => console.log("Exportando dados de", img.id)}
+            data={formatarData(img.data)}
+            bandas={img.bandas}
+            isSelected={imagemThumbnail?.id === img.id}
+            onSelect={() => handleSelecionarImagem(img)}
+            onProcess={() => handleProcessarImagem(img)}
           />
         ))}
       </ScrollContainer>

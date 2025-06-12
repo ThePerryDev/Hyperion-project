@@ -4,7 +4,7 @@ export const formatarData = (dataISO?: string) => {
   return `${dia}/${mes}/${ano}`;
 };
 
-export const handleProcessarImagem = async (
+/*export const handleProcessarImagem = async (
   img: {
     id: string;
     thumbnail: string;
@@ -51,3 +51,4 @@ export const handleProcessarImagem = async (
     alert("Erro ao processar imagem.");
   }
 };
+*/

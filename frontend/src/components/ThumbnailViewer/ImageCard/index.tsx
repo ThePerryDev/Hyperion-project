@@ -1,45 +1,41 @@
-import { CartaoImagemEstilizado, TextoInfo } from "./styles";
+import { CartaoImagemEstilizado, TextoInfo, ThumbnailImage, SelectButton } from "./styles";
 
 interface ImageCardProps {
   id: string;
+  thumbnail: string;
   bbox?: number[];
   colecao?: string;
   data?: string;
-  onExport: () => void;
+  bandas?: {
+    BAND15?: string;
+    BAND16?: string;
+  };
+  isSelected: boolean;
+  onSelect: () => void;
+  onProcess: () => void;
 }
 
 export default function ImageCard({
   id,
+  thumbnail,
   bbox,
   colecao,
   data,
-  onExport,
+  bandas,
+  isSelected,
+  onSelect,
+  onProcess,
 }: ImageCardProps) {
   return (
-    <CartaoImagemEstilizado>
-      <TextoInfo>ÁREA</TextoInfo>
-      <TextoInfo>BBOX: {bbox?.join(", ")}</TextoInfo>
-      <TextoInfo>Coleção: {colecao}</TextoInfo>
-      <TextoInfo>Data: {data}</TextoInfo>
-      <TextoInfo>
-        Banda Verde: <a>LINK</a>
-      </TextoInfo>
-      <TextoInfo>
-        Banda Azul: <a>LINK</a>
-      </TextoInfo>
-      <TextoInfo>
-        Banda Vermelho: <a>LINK</a>
-      </TextoInfo>
-      <TextoInfo>
-        Banda NIR: <a>LINK</a>
-      </TextoInfo>
-      <TextoInfo>
-        Imagem NDVI: <a>LINK</a>
-      </TextoInfo>
-      <TextoInfo>
-        Imagem Processada: <a>LINK</a>
-      </TextoInfo>
-      <button onClick={onExport}>Exportar Todos os Dados</button>
+    <CartaoImagemEstilizado selected={isSelected}>
+      <ThumbnailImage src={thumbnail} alt={id} />
+      <TextoInfo><strong>ID:</strong> {id}</TextoInfo>
+      <TextoInfo><strong>BBOX:</strong> {bbox?.join(", ")}</TextoInfo>
+      <TextoInfo><strong>Coleção:</strong> {colecao}</TextoInfo>
+      <TextoInfo><strong>Data:</strong> {data}</TextoInfo>
+
+      <SelectButton onClick={onSelect}>Selecionar</SelectButton>
+      {isSelected && <SelectButton onClick={onProcess}>Processar Imagem</SelectButton>}
     </CartaoImagemEstilizado>
   );
 }

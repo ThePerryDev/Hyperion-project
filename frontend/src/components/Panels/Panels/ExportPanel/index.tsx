@@ -1,86 +1,49 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import {
-  ButtonCustom,
-  CloseButton,
-  InputCustom,
-  OptionDiv,
-  Panel,
-  ScrollContainer,
-  SelectCustom,
-} from "../../..";
+import { CloseButton, ScrollContainer } from "../../..";
+import ExportImageCard from "../../../ExportData/ExportImageCard";
+import LargePanel from "../../../ExportData/LargePanel";
 
-interface ExportPanelProps {
+interface ExportDataProps {
+  imagens: {
+    id: string;
+    bbox?: number[];
+    colecao?: string;
+    data?: string;
+    bandas?: {
+      Verde?: string;
+      Azul?: string;
+      Vermelho?: string;
+      NIR?: string;
+    };
+    ndviUrl?: string;
+    processadaUrl?: string;
+  }[];
   onClose: () => void;
 }
 
-export default function ExportPanel({ onClose }: ExportPanelProps) {
-  const [colecaoSelecionada, setColecaoSelecionada] = useState("");
-  const [colecoes, setColecoes] = useState<string[]>([]);
-  const [dataFim, setDataFim] = useState("");
-  const [dataInicio, setDataInicio] = useState("");
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8000/colecoes-suportadas")
-      .then((res) => {
-        const nomes = res.data.map((colecao: { id: string }) => colecao.id);
-        setColecoes(nomes);
-      })
-      .catch((err) => {
-        console.error("Erro ao buscar coleções:", err);
-      });
-  }, []);
+export default function ExportPanel({ imagens, onClose }: ExportDataProps) {
+  const handleExportarTudo = (id: string) => {
+    console.log("Exportando dados da imagem:", id);
+    // Aqui futuramente pode ser feito download zipado
+  };
 
   return (
-    <Panel>
+    <LargePanel>
       <CloseButton onClick={onClose} />
       <ScrollContainer>
-        <h3>Exportar</h3>
-        <OptionDiv>
-          <InputCustom placeholder="Limite Esquerdo Inferior" />
-        </OptionDiv>
-        <OptionDiv>
-          <InputCustom placeholder="Limite Esquerdo Superior" />
-        </OptionDiv>
-        <OptionDiv>
-          <InputCustom placeholder="Limite Direito Inferior" />
-        </OptionDiv>
-        <OptionDiv>
-          <InputCustom placeholder="Limite Direito Superior" />
-        </OptionDiv>
-        <OptionDiv label="Coleção/Satelite">
-          <SelectCustom
-            defaultValue=""
-            onChange={(e) => setColecaoSelecionada(e.target.value)}
-            value={colecaoSelecionada}
-          >
-            <option value="" disabled hidden>
-              Selecione a Coleção
-            </option>
-            {colecoes.map((colecaoId) => (
-              <option key={colecaoId} value={colecaoId}>
-                {colecaoId}
-              </option>
-            ))}
-          </SelectCustom>
-        </OptionDiv>
-        <OptionDiv label="Data Fim (UTC)">
-          <InputCustom
-            onChange={(e) => setDataFim(e.target.value)}
-            type="date"
-            value={dataFim}
+        {imagens.map((img) => (
+          <ExportImageCard
+            key={img.id}
+            id={img.id}
+            bbox={img.bbox}
+            colecao={img.colecao}
+            data={img.data}
+            bandas={img.bandas}
+            ndviUrl={img.ndviUrl}
+            processadaUrl={img.processadaUrl}
+            onExport={() => handleExportarTudo(img.id)}
           />
-        </OptionDiv>
-        <OptionDiv label="Data Início (UTC)">
-          <InputCustom
-            onChange={(e) => setDataInicio(e.target.value)}
-            type="date"
-            value={dataInicio}
-          />
-        </OptionDiv>
-        <ButtonCustom>Exportar Dados</ButtonCustom>
+        ))}
       </ScrollContainer>
-    </Panel>
+    </LargePanel>
   );
 }
