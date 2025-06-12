@@ -1,17 +1,37 @@
-import exportIcon from "./exportIcon.png";
-import hyperionLogo from "./hyperionLogo.png";
-import mapIcon from "./mapIcon.png";
-import openExportIcon from "./openExportIcon.png";
-import opemMapIcon from "./openMapIcon.png";    
-import returnIcon from "./returnIcon.png";
-import searchIcon from "./searchIcon.png";
-import settings from "./settings.png";
-import openSettingsIcon from "./openSettingsIcon.png";
-import eyeOpenIcon from "./eyeOpenIcon.png"
-import eyeCloseIcon from "./eyeCloseIcon.png"
-import hyperio_logo from "./img/hyperion_login_logo.png"
-import login_background from "./img/login_background.png"
-import password_icon from "./img/password_login_icon.png"
-import user_icon from "./img/user_login_icon.png"
+import exportIcon from "./img/exportIcon.png";
+import eyeCloseIcon from "./img/eyeCloseIcon.png";
+import eyeOpenIcon from "./img/eyeOpenIcon.png";
+import hyperionLogo from "./img/hyperionLogo.png";
+import hyperionLogoBanner from "./img/hyperionLogoBanner.png";
+import loginBackground from "./img/loginBackground.png";
+import mapIcon from "./img/mapIcon.png";
+import openExportIcon from "./img/openExportIcon.png";
+import openMapIcon from "./img/openMapIcon.png";
+import openOverlayIcon from "./img/openOverlayIcon.png";
+import openUserIcon from "./img/openUserIcon.png";
+import overlayIcon from "./img/overlayIcon.png";
+import passwordIcon from "./img/passwordIcon.png";
+import returnIcon from "./img/returnIcon.png";
+import searchIcon from "./img/searchIcon.png";
+import userIcon from "./img/userIcon.png";
+import users from "./img/users.png";
 
-export { exportIcon, hyperionLogo, mapIcon, openExportIcon, opemMapIcon, returnIcon, searchIcon, settings, openSettingsIcon, eyeCloseIcon, eyeOpenIcon, hyperio_logo, login_background, password_icon, user_icon }
+export {
+  exportIcon,
+  eyeCloseIcon,
+  eyeOpenIcon,
+  hyperionLogo,
+  hyperionLogoBanner,
+  loginBackground,
+  mapIcon,
+  openExportIcon,
+  openMapIcon,
+  openOverlayIcon,
+  openUserIcon,
+  overlayIcon,
+  passwordIcon,
+  returnIcon,
+  searchIcon,
+  userIcon,
+  users,
+};

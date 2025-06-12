@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { hyperio_logo, user_icon, password_icon } from "../../assets";
 import { AuthContext } from "../../context/AuthContext";
 import { InputSld, LoginSld } from "./styles";
+import { hyperionLogo, passwordIcon, userIcon } from "../../assets";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,8 +10,8 @@ export default function Login() {
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
 
-   const handleLogin = async (e: React.FormEvent) => {
-     e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     // verifica se email e senha estão preeenchidos e manda para o contexto email e senha
     if (email && password) {
       const isLogged = await auth.signin(email, password);
@@ -26,12 +26,12 @@ export default function Login() {
   return (
     <LoginSld>
       <form>
-        <img id="hyperion-logo" src={hyperio_logo} alt="Hyperion login logo" />
+        <img id="hyperion-logo" src={hyperionLogo} alt="Hyperion login logo" />
 
         <h1>LOGIN</h1>
 
         <InputSld>
-          <img src={user_icon} alt="" />
+          <img src={userIcon} alt="" />
           <input
             type="text"
             value={email}
@@ -41,7 +41,7 @@ export default function Login() {
         </InputSld>
 
         <InputSld>
-          <img src={password_icon} alt="" />
+          <img src={passwordIcon} alt="" />
           <input
             type="password"
             value={password}

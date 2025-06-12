@@ -2,7 +2,7 @@ import "./index.css";
 import styled, { createGlobalStyle } from "styled-components";
 import CustomHeader from "./components/CustomHeader";
 import RoutesApp from "./routes";
-import NavigationBar from "./components/NavBar";
+import NavigationBar from "./components/NavBar/NavBar";
 import { BBoxProvider } from "./context/BBoxContext";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";

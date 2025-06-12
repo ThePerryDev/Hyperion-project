@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import bgImage from "../../assets/img/login_background.png"
 import { breakpoints } from "../../styles/brekpoints";
+import { loginBackground } from "../../assets";
 
 export const LoginSld = styled.main`
   height: 100%;
-  background-image: url(${bgImage});
+  background-image: url(${loginBackground});
   background-color: black;
   background-repeat: no-repeat;
   background-size: cover;

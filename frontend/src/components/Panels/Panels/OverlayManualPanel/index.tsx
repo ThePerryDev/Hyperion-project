@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import { useBBox } from "../../context/BBoxContext";
+import { useBBox } from "../../../../context/BBoxContext";
+import { CloseButton } from "../../..";
 
 const Panel = styled.div`
   position: absolute;
@@ -87,10 +88,7 @@ interface Props {
 }
 
 export default function OverlayManualPanel({ onClose }: Props) {
-  const {
-    setImagemProcessada,
-    setMostrarProcessada,
-  } = useBBox();
+  const { setImagemProcessada, setMostrarProcessada } = useBBox();
 
   const [arquivos, setArquivos] = useState<string[]>([]);
   const [tifSelecionado, setTifSelecionado] = useState("");
@@ -118,7 +116,12 @@ export default function OverlayManualPanel({ onClose }: Props) {
           const b = res.data.bbox;
           if (b) {
             setBbox(`${b[0]},${b[1]},${b[2]},${b[3]}`);
-            setPngUrl(`http://localhost:8000/output/${tifSelecionado.replace("_classes.tif", "_rgb.png")}`);
+            setPngUrl(
+              `http://localhost:8000/output/${tifSelecionado.replace(
+                "_classes.tif",
+                "_rgb.png"
+              )}`
+            );
           }
         })
         .catch((err) => {
@@ -149,9 +152,13 @@ export default function OverlayManualPanel({ onClose }: Props) {
 
   return (
     <Panel>
+      <CloseButton onClick={onClose} />
       <Title>Overlay Manual</Title>
 
-      <Select value={tifSelecionado} onChange={(e) => setTifSelecionado(e.target.value)}>
+      <Select
+        value={tifSelecionado}
+        onChange={(e) => setTifSelecionado(e.target.value)}
+      >
         <option value="">Selecione um arquivo TIF</option>
         {arquivos.map((file) => (
           <option key={file} value={file}>
