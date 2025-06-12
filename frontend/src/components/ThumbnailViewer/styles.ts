@@ -20,14 +20,13 @@ export const Panel = styled.div`
   }
 
   @media (max-width: 768px) {
-    width: 80vw;
+    width: 60vw;
     border-radius: 0px;
     right: 0;
   }
 
-  @media (max-width: 480px) {
-    width: 100vw;
-    height: 100vh;
+  @media (max-width: 600px) {
+    width: 40vw;
     padding-top: 2rem;
     border-radius: 0px;
     right: 0;
@@ -95,6 +94,7 @@ export const SelectButton = styled.button`
   letter-spacing: 1px;
   cursor: pointer;
   margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   transition: background-color 0.2s ease, transform 0.15s ease;
 
   &:hover {

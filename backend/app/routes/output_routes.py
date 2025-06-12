@@ -51,24 +51,27 @@ def listar_processados():
 @router.get("/bbox-from-tif/")
 def bbox_from_tif(filename: str = Query(...)):
     try:
-        json_filename = filename.replace("_classes.tif", ".json")
         caminho = os.path.join("output", filename)
         if not os.path.exists(caminho):
             raise HTTPException(status_code=404, detail="Arquivo não encontrado.")
 
         with rasterio.open(caminho) as src:
-            transform = src.transform
             width = src.width
             height = src.height
 
-            # Cálculo direto com transform
-            lon_min, lat_max = transform * (0, 0)
-            lon_max, lat_min = transform * (width, height)
+            # Coordenadas de canto superior esquerdo (0,0) e inferior direito (width, height)
+            lon_min, lat_max = src.transform * (0, 0)
+            lon_max, lat_min = src.transform * (width, height)
 
-            # Reprojetar se necessário
-            src_crs = src.crs
-            if src_crs != "EPSG:4326":
-                transformer = Transformer.from_crs(src_crs, "EPSG:4326", always_xy=True)
+            # Corrigir se estiver invertido
+            if lat_min > lat_max:
+                lat_min, lat_max = lat_max, lat_min
+            if lon_min > lon_max:
+                lon_min, lon_max = lon_max, lon_min
+
+            # Reprojetar para WGS84 se necessário
+            if src.crs and src.crs != "EPSG:4326":
+                transformer = Transformer.from_crs(src.crs, "EPSG:4326", always_xy=True)
                 lon_min, lat_min = transformer.transform(lon_min, lat_min)
                 lon_max, lat_max = transformer.transform(lon_max, lat_max)
 

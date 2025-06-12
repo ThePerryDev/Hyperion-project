@@ -87,12 +87,11 @@ interface Props {
 }
 
 export default function OverlayManualPanel({ onClose }: Props) {
-  const {
-    setImagemProcessada,
-    setMostrarProcessada,
-  } = useBBox();
+  const { setImagemProcessada, setMostrarProcessada } = useBBox();
 
-  const [arquivos, setArquivos] = useState<string[]>([]);
+  const [arquivos, setArquivos] = useState<
+    { id: string; preview_png: string; bbox_real: number[] }[]
+  >([]);
   const [tifSelecionado, setTifSelecionado] = useState("");
   const [bbox, setBbox] = useState("");
   const [pngUrl, setPngUrl] = useState("");
@@ -101,7 +100,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
     axios
       .get("http://localhost:8000/processed-list/")
       .then((res) => {
-        setArquivos(res.data.arquivos || []);
+        setArquivos(res.data || []);
       })
       .catch((err) => {
         console.error("Erro ao buscar arquivos processados:", err);
@@ -109,23 +108,12 @@ export default function OverlayManualPanel({ onClose }: Props) {
   }, []);
 
   useEffect(() => {
-    if (tifSelecionado) {
-      axios
-        .get("http://localhost:8000/bbox-from-tif/", {
-          params: { filename: tifSelecionado },
-        })
-        .then((res) => {
-          const b = res.data.bbox;
-          if (b) {
-            setBbox(`${b[0]},${b[1]},${b[2]},${b[3]}`);
-            setPngUrl(`http://localhost:8000/output/${tifSelecionado.replace("_classes.tif", "_rgb.png")}`);
-          }
-        })
-        .catch((err) => {
-          console.error("Erro ao buscar BBOX:", err);
-        });
+    const arquivo = arquivos.find((a) => `${a.id}_classes.tif` === tifSelecionado);
+    if (arquivo) {
+      setBbox(arquivo.bbox_real.join(","));
+      setPngUrl(`http://localhost:8000${arquivo.preview_png}`);
     }
-  }, [tifSelecionado]);
+  }, [tifSelecionado, arquivos]);
 
   const handleMostrar = () => {
     const coords = bbox.split(",").map(Number);
@@ -151,11 +139,14 @@ export default function OverlayManualPanel({ onClose }: Props) {
     <Panel>
       <Title>Overlay Manual</Title>
 
-      <Select value={tifSelecionado} onChange={(e) => setTifSelecionado(e.target.value)}>
+      <Select
+        value={tifSelecionado}
+        onChange={(e) => setTifSelecionado(e.target.value)}
+      >
         <option value="">Selecione um arquivo TIF</option>
         {arquivos.map((file) => (
-          <option key={file} value={file}>
-            {file}
+          <option key={file.id} value={`${file.id}_classes.tif`}>
+            {file.id}
           </option>
         ))}
       </Select>
