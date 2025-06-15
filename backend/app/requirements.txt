@@ -17,3 +17,6 @@ Pillow
 torch
 segmentation-models-pytorch
 pyproj
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart

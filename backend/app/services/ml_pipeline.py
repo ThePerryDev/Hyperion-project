@@ -6,9 +6,12 @@ import asyncio
 from rasterio.coords import BoundingBox
 from rasterio.windows import from_bounds
 from PIL import Image, ImageDraw
+from app.core.database import SessionLocal
+from app.models.processamento_model import Processamento
 from app.utils.download_utils import baixar_arquivo
 from app.model import get_unet_model
 from asyncio import Event
+from datetime import datetime
 import matplotlib.pyplot as plt
 import logging
 from app.utils.progresso_manager import progresso_manager
@@ -78,11 +81,13 @@ def save_ndvi_preview(ndvi_array, save_path, cancel: Event = None):
     rgb_image[(ndvi_array >= 0.2) & (ndvi_array < 0.3)] = [124, 94, 21]
     rgb_image[ndvi_array >= 0.3] = [16, 149, 9]
 
-    plt.figure(figsize=(10, 10))
+    altura, largura, _ = rgb_image.shape
+    aspect_ratio = largura / altura
+
+    plt.figure(figsize=(10 * aspect_ratio, 10))
     plt.imshow(rgb_image)
     plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=150)
+    plt.savefig(save_path, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
 
 async def run_model(ndvi_path, output_prefix, cancel: Event = None):
@@ -99,7 +104,8 @@ async def run_model(ndvi_path, output_prefix, cancel: Event = None):
     with rasterio.open(ndvi_path) as src:
         ndvi_array = src.read(1)
         profile = src.profile.copy()
-        ndvi_array = np.nan_to_num(ndvi_array)
+        transform = src.transform   # <- adicionado
+        crs = src.crs  
 
     if ndvi_array.min() < 0 or ndvi_array.max() > 1:
         ndvi_array = (ndvi_array + 1) / 2
@@ -179,7 +185,12 @@ async def run_model(ndvi_path, output_prefix, cancel: Event = None):
 
     print(f"📀 Salvando classes em {output_tif}")
     profile.pop("nodata", None)
-    profile.update(dtype=rasterio.uint8, count=1)
+    profile.update(
+        dtype=rasterio.uint8,
+        count=1,
+        transform=transform,
+        crs=crs              
+    )
     with rasterio.open(output_tif, "w", **profile) as dst:
         dst.write(predicted_mask, 1)
 
@@ -199,17 +210,14 @@ async def processar_imagem_completa(data, cancel: Event):
     ndvi_preview = f"data/processed/{data.id}_ndvi_preview.png"
 
     if cancel.is_set():
-        print("🛑 Cancelado antes de iniciar downloads")
-        raise Exception("Processamento cancelado antes de iniciar downloads")
+        raise Exception("Cancelado antes de iniciar downloads")
 
     baixar_arquivo(data.band15_url, red_path, cancel)
     if cancel.is_set():
-        print("🛑 Cancelado após download BAND15")
         raise Exception("Cancelado após download BAND15")
 
     baixar_arquivo(data.band16_url, nir_path, cancel)
     if cancel.is_set():
-        print("🛑 Cancelado após download BAND16")
         raise Exception("Cancelado após download BAND16")
 
     compute_ndvi(red_path, nir_path, ndvi_tif, ndvi_preview, cancel)
@@ -222,6 +230,31 @@ async def processar_imagem_completa(data, cancel: Event):
     progresso_manager.limpar(data.id)
 
     logging.info(f"✅ Processamento concluído para: {data.id}")
+
+    # ✅ Persistência no banco de dados
+    try:
+        async with SessionLocal() as session:
+            novo = Processamento(
+                id_imagem=data.id,
+                banda13=data.band13_url,
+                banda14=data.band14_url,
+                banda15=data.band15_url,
+                banda16=data.band16_url,
+                cmask=data.cmask,
+                thumbnail=data.thumbnail,
+                ndvi_tif=ndvi_tif,
+                ndvi_png=ndvi_preview,
+                segmentado_tif=tif_final,
+                segmentado_png=png_final,
+                bbox_real=real_bbox,
+                usuario_id=data.usuario_id
+            )
+            session.add(novo)
+            await session.commit()
+    except Exception as e:
+        logging.error(f"❌ Falha ao salvar no banco: {e}")
+
+    # Retorno final
     return {
         "preview_png": f"/output/{data.id}_rgb.png",
         "preview_tif": f"/output/{data.id}_classes.tif",

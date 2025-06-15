@@ -1,7 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.controllers.usuario_controller import UsuarioController
+from fastapi.security import OAuth2PasswordRequestForm
+from app.core.security import verify_password, create_access_token
 from pydantic import BaseModel
 from typing import Optional
+from app.dependencies.auth_dependencies import get_current_user
+from app.models.usuario_model import Usuario
 
 router = APIRouter()
 usuario_controller = UsuarioController()
@@ -22,7 +26,7 @@ class UsuarioUpdate(BaseModel):
     isLogged: Optional[bool] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UsuarioResponse(BaseModel):
@@ -33,8 +37,18 @@ class UsuarioResponse(BaseModel):
     isLogged: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+@router.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    usuarios = await usuario_controller.buscar_usuarios()
+    usuario = next((u for u in usuarios if u.email == form_data.username), None)
+
+    if not usuario or not verify_password(form_data.password, usuario.password):
+        raise HTTPException(status_code=400, detail="Usuário ou senha inválidos")
+
+    token = create_access_token({"sub": usuario.email})
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/usuarios/post")
 async def criar_usuario(usuario: UsuarioSchema):
@@ -47,11 +61,14 @@ async def criar_usuario(usuario: UsuarioSchema):
     )
     return usuario_criado
 
-
 @router.get("/usuarios/getall")
 async def listar_usuarios():
     usuarios = await usuario_controller.buscar_usuarios()
     return usuarios
+
+@router.get("/usuarios/me")
+async def get_usuario_logado(current_user: Usuario = Depends(get_current_user)):
+    return current_user
 
 @router.get("/usuarios/get/{id}")
 async def buscar_usuario(id: int):

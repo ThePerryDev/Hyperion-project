@@ -1,14 +1,24 @@
-from fastapi import APIRouter, HTTPException, Query
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from app.core.database import SessionLocal
+from app.models.processamento_model import Processamento
+from app.models.usuario_model import Usuario
 from app.schemas.ml_request_schema import MLProcessRequest
+from app.schemas.processamento_schema import ProcessamentoSchema
 from app.services.ml_pipeline import processar_imagem_completa
 from app.utils.cancel_instance import cancel_manager
 from app.utils.progresso_manager import progresso_manager
+from app.dependencies.auth_dependencies import get_current_user
 import asyncio
 
 router = APIRouter()
 
 @router.post("/processar-imagem")
-async def processar_imagem(data: MLProcessRequest):
+async def processar_imagem(
+    data: MLProcessRequest,
+    current_user: Usuario = Depends(get_current_user)  # ✅ Adicionado aqui
+):
     print(f"🔍 Requisição de processamento recebida para: {data.id}")
 
     if cancel_manager.is_cancelado(data.id):
@@ -17,6 +27,9 @@ async def processar_imagem(data: MLProcessRequest):
 
     cancel_manager.iniciar(data.id)
     cancel_event = cancel_manager.get_evento(data.id)
+
+    # ✅ Garante que o ID do usuário vem da sessão autenticada
+    data.usuario_id = current_user.id
 
     async def tarefa():
         try:
@@ -32,6 +45,14 @@ async def processar_imagem(data: MLProcessRequest):
     asyncio.create_task(tarefa())
     return {"status": "processamento iniciado"}
 
+@router.get("/meus-processamentos", response_model=List[ProcessamentoSchema])
+async def meus_processamentos(current_user: Usuario = Depends(get_current_user)):
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(Processamento).where(Processamento.usuario_id == current_user.id)
+        )
+        return result.scalars().all()
+    
 @router.post("/cancelar-processamento")
 async def cancelar_processamento(id: str = Query(...)):
     print(f"🚨 Pedido de cancelamento para: {id}")
@@ -52,6 +73,7 @@ def cancelar_fixo():
 def ping():
     print("🔔 Ping recebido")
     return {"status": "ok"}
+
 
 #Este novo arquivo substitui e funde os seguintes arquivos do primeiro repositório:
 
