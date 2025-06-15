@@ -2,29 +2,34 @@ import os
 import torch
 import numpy as np
 import rasterio
+import asyncio
 from rasterio.coords import BoundingBox
 from rasterio.windows import from_bounds
 from PIL import Image, ImageDraw
+from app.core.database import SessionLocal
+from app.models.processamento_model import Processamento
 from app.utils.download_utils import baixar_arquivo
 from app.model import get_unet_model
+from asyncio import Event
+from datetime import datetime
 import matplotlib.pyplot as plt
+import logging
+from app.utils.progresso_manager import progresso_manager
+from app.utils.websocket_manager import websocket_manager
 
-# Cores das classes
 COLORS = {
     1: (255, 0, 0, 255),     # Queimada
     2: (124, 94, 21, 255),   # Solo
     3: (16, 149, 9, 255),    # Vegetação
 }
 
-def compute_ndvi(red_path, nir_path, output_path, preview_path=None):
+def compute_ndvi(red_path, nir_path, output_path, preview_path=None, cancel: Event = None):
     print(f"📥 Abrindo RED: {red_path} e NIR: {nir_path}")
-
     with rasterio.open(red_path) as red, rasterio.open(nir_path) as nir:
         print("🔍 Verificando interseção espacial...")
         red_bounds = red.bounds
         nir_bounds = nir.bounds
 
-        # Verifica interseção espacial
         intersection = BoundingBox(
             left=max(red_bounds.left, nir_bounds.left),
             bottom=max(red_bounds.bottom, nir_bounds.bottom),
@@ -38,17 +43,14 @@ def compute_ndvi(red_path, nir_path, output_path, preview_path=None):
         red_data = red.read(1, window=red_window).astype("float32")
         nir_data = nir.read(1, window=nir_window).astype("float32")
 
-        if red_data.shape != nir_data.shape:
-            raise ValueError("As janelas de RED e NIR resultam em tamanhos diferentes.")
+        if cancel and cancel.is_set():
+            print("🛑 Cancelado durante leitura de dados NDVI")
+            raise Exception("Processamento cancelado durante NDVI")
 
-        print(f"📏 Shape comum: {red_data.shape}")
-
-        # Calcular NDVI
         print("🧮 Calculando NDVI...")
         ndvi = (nir_data - red_data) / (nir_data + red_data + 1e-10)
         ndvi = np.clip(ndvi, -1, 1)
 
-        # Atualizar perfil com novo shape e transform
         profile = red.profile
         profile.update(
             dtype="float32",
@@ -62,32 +64,33 @@ def compute_ndvi(red_path, nir_path, output_path, preview_path=None):
         with rasterio.open(output_path, "w", **profile) as dst:
             dst.write(ndvi, 1)
 
-        # Visualização (com mesma escala de cores da máscara)
         if preview_path:
             print(f"🖼️ Gerando visualização temática em: {preview_path}")
-            save_ndvi_preview(ndvi, preview_path)
+            save_ndvi_preview(ndvi, preview_path, cancel)
 
         print("✅ NDVI processado e salvo com sucesso.")
 
-def save_ndvi_preview(ndvi_array, save_path):
-    # Inicializar imagem RGB
+def save_ndvi_preview(ndvi_array, save_path, cancel: Event = None):
+    if cancel and cancel.is_set():
+        print("🛑 Cancelado antes de gerar preview NDVI")
+        raise Exception("Cancelado antes de salvar visualização NDVI")
+
     rgb_image = np.zeros((ndvi_array.shape[0], ndvi_array.shape[1], 3), dtype=np.uint8)
+    rgb_image[ndvi_array < 0.1] = [0, 0, 128]
+    rgb_image[(ndvi_array >= 0.1) & (ndvi_array < 0.2)] = [255, 0, 0]
+    rgb_image[(ndvi_array >= 0.2) & (ndvi_array < 0.3)] = [124, 94, 21]
+    rgb_image[ndvi_array >= 0.3] = [16, 149, 9]
 
-    # Aplicar cores por faixa
-    rgb_image[ndvi_array < 0.1] = [0, 0, 128] # Azul escuro (água)
-    rgb_image[(ndvi_array >= 0.1) & (ndvi_array < 0.2)] = [255, 0, 0]  # Vermelho (queimada)
-    rgb_image[(ndvi_array >= 0.2) & (ndvi_array < 0.3)] = [124, 94, 21]  # Marrom (solo em recuperação)
-    rgb_image[ndvi_array >= 0.3] = [16, 149, 9]  # Verde escuro (vegetação saudável)
+    altura, largura, _ = rgb_image.shape
+    aspect_ratio = largura / altura
 
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(10 * aspect_ratio, 10))
     plt.imshow(rgb_image)
-    plt.title("NDVI com escala temática")
     plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=150)
+    plt.savefig(save_path, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
 
-def run_model(ndvi_path, output_prefix):
+async def run_model(ndvi_path, output_prefix, cancel: Event = None):
     tile_size = 256
     stride = 128
 
@@ -101,9 +104,8 @@ def run_model(ndvi_path, output_prefix):
     with rasterio.open(ndvi_path) as src:
         ndvi_array = src.read(1)
         profile = src.profile.copy()
-        ndvi_array = np.nan_to_num(ndvi_array)
-        transform = src.transform
-        crs = src.crs
+        transform = src.transform   # <- adicionado
+        crs = src.crs  
 
     if ndvi_array.min() < 0 or ndvi_array.max() > 1:
         ndvi_array = (ndvi_array + 1) / 2
@@ -119,13 +121,9 @@ def run_model(ndvi_path, output_prefix):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = get_unet_model(num_classes=4).to(device)
     model_path = "models/final_model_1.pth"
-    print(f"📦 Carregando modelo de: {model_path}")
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Modelo não encontrado em {model_path}")
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
 
-    print("🧹 Calculando número de tiles...")
     total_tiles_x = (w - 1) // stride + 1
     total_tiles_y = (h - 1) // stride + 1
     total_tiles = total_tiles_x * total_tiles_y
@@ -137,46 +135,72 @@ def run_model(ndvi_path, output_prefix):
     with torch.no_grad():
         for i in range(0, h, stride):
             for j in range(0, w, stride):
+                if cancel and cancel.is_set():
+                    print("🛑 Cancelado antes do tile")
+                    raise Exception("Cancelado antes do tile")
+
                 i_end = min(i + tile_size, h)
                 j_end = min(j + tile_size, w)
 
                 tile_count += 1
-                
-                print(f"🧩 Número Total de Tiles: {tile_count}/{total_tiles} - Processando tile: linha {i}-{i_end}, coluna {j}-{j_end}")
+                progresso = tile_count / total_tiles
+                progresso_manager.set_progresso(output_prefix, progresso)
+                await websocket_manager.send_progress(output_prefix, progresso)
+                print(f"🧩 Processando tile {tile_count}/{total_tiles} - região ({i}:{i_end}, {j}:{j_end})")
 
                 tile = ndvi_array[i:i_end, j:j_end]
-
                 pad_h = tile_size - tile.shape[0]
                 pad_w = tile_size - tile.shape[1]
                 tile_padded = np.pad(tile, ((0, pad_h), (0, pad_w)), mode='constant', constant_values=0)
 
+                if cancel and cancel.is_set():
+                    print("🛑 Cancelado antes do forward")
+                    raise Exception("Cancelado antes do forward")
+
                 tile_tensor = torch.tensor(tile_padded, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)
                 output = model(tile_tensor).squeeze(0).cpu().numpy()
-                output = output[:, :tile.shape[0], :tile.shape[1]]
 
+                if cancel and cancel.is_set():
+                    print("🛑 Cancelado após forward")
+                    raise Exception("Cancelado após forward")
+
+                output = output[:, :tile.shape[0], :tile.shape[1]]
                 predicted = np.argmax(output, axis=0).astype(np.uint8)
+
+                if cancel and cancel.is_set():
+                    print("🛑 Cancelado após argmax")
+                    raise Exception("Cancelado após argmax")
+
                 predicted_mask[i:i_end, j:j_end] = predicted
 
                 for label, color in COLORS.items():
                     ys, xs = np.where(predicted == label)
-                    for y, x in zip(ys, xs):
+                    for idx, (y, x) in enumerate(zip(ys, xs)):
+                        if cancel and cancel.is_set():
+                            print("🛑 Cancelado durante desenho")
+                            raise Exception("Cancelado durante desenho")
                         draw.point((j + x, i + y), fill=color)
-
+                        if idx % 5000 == 0:
+                            await asyncio.sleep(0)
 
     print(f"📀 Salvando classes em {output_tif}")
     profile.pop("nodata", None)
-    profile.update(dtype=rasterio.uint8, count=1)
+    profile.update(
+        dtype=rasterio.uint8,
+        count=1,
+        transform=transform,
+        crs=crs              
+    )
     with rasterio.open(output_tif, "w", **profile) as dst:
         dst.write(predicted_mask, 1)
-    
+
     print(f"📀 Salvando preview transparente em {output_png}")
     rgba_image.save(output_png)
 
-    print("✅ Tudo pronto.")
     return output_tif, output_png
 
-async def processar_imagem_completa(data):
-    print(f"🟡 Iniciando processamento de {data.id}")
+async def processar_imagem_completa(data, cancel: Event):
+    logging.info(f"🚀 Iniciando processamento para: {data.id}")
     print(f"👉 BAND15 URL: {data.band15_url}")
     print(f"👉 BAND16 URL: {data.band16_url}")
 
@@ -185,21 +209,52 @@ async def processar_imagem_completa(data):
     ndvi_tif = f"data/processed/{data.id}_ndvi.tif"
     ndvi_preview = f"data/processed/{data.id}_ndvi_preview.png"
 
-    # Download
-    baixar_arquivo(data.band15_url, red_path)
-    baixar_arquivo(data.band16_url, nir_path)
+    if cancel.is_set():
+        raise Exception("Cancelado antes de iniciar downloads")
 
-    # NDVI
-    compute_ndvi(red_path, nir_path, ndvi_tif, ndvi_preview)
+    baixar_arquivo(data.band15_url, red_path, cancel)
+    if cancel.is_set():
+        raise Exception("Cancelado após download BAND15")
 
-    # Segmentação
-    tif_final, png_final = run_model(ndvi_tif, data.id)
+    baixar_arquivo(data.band16_url, nir_path, cancel)
+    if cancel.is_set():
+        raise Exception("Cancelado após download BAND16")
 
-    # Extração do bbox real
+    compute_ndvi(red_path, nir_path, ndvi_tif, ndvi_preview, cancel)
+    tif_final, png_final = await run_model(ndvi_tif, data.id, cancel)
+
     with rasterio.open(tif_final) as src:
         bounds = src.bounds
         real_bbox = [bounds.left, bounds.bottom, bounds.right, bounds.top]
 
+    progresso_manager.limpar(data.id)
+
+    logging.info(f"✅ Processamento concluído para: {data.id}")
+
+    # ✅ Persistência no banco de dados
+    try:
+        async with SessionLocal() as session:
+            novo = Processamento(
+                id_imagem=data.id,
+                banda13=data.band13_url,
+                banda14=data.band14_url,
+                banda15=data.band15_url,
+                banda16=data.band16_url,
+                cmask=data.cmask,
+                thumbnail=data.thumbnail,
+                ndvi_tif=ndvi_tif,
+                ndvi_png=ndvi_preview,
+                segmentado_tif=tif_final,
+                segmentado_png=png_final,
+                bbox_real=real_bbox,
+                usuario_id=data.usuario_id
+            )
+            session.add(novo)
+            await session.commit()
+    except Exception as e:
+        logging.error(f"❌ Falha ao salvar no banco: {e}")
+
+    # Retorno final
     return {
         "preview_png": f"/output/{data.id}_rgb.png",
         "preview_tif": f"/output/{data.id}_classes.tif",

@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pystac-client
 rasterio
 numpy
@@ -9,12 +9,14 @@ asyncpg
 alembic
 python-dotenv
 pydantic
-typing
+typing-extensions
 dotenv
 matplotlib
-cors
 requests
 Pillow
 torch
 segmentation-models-pytorch
 pyproj
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart

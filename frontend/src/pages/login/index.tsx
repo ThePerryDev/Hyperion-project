@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { hyperio_logo, user_icon, password_icon } from "../../assets";
 import { AuthContext } from "../../context/AuthContext";
-import { InputSld, LoginSld } from "./styles";
+import { Button, InputSld, LoginSld } from "./styles";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,8 +14,8 @@ export default function Login() {
      e.preventDefault();
     // verifica se email e senha estão preeenchidos e manda para o contexto email e senha
     if (email && password) {
-      const isLogged = await auth.signin(email, password);
-      if (isLogged) {
+      const user = await auth.signin(email, password);
+      if (user) {
         navigate("/");
       } else {
         alert("Falha ao logar");
@@ -50,7 +50,7 @@ export default function Login() {
           />
         </InputSld>
 
-        <button onClick={handleLogin}> ENTRAR</button>
+        <Button onClick={handleLogin}> ENTRAR</Button>
       </form>
     </LoginSld>
   );

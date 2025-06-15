@@ -1,11 +1,8 @@
-from sqlalchemy import Column, String, Date, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, Date, JSON, Integer, ForeignKey
+from app.core.database import Base
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import engine  # O engine assíncrono configurado
 from datetime import date
-
-# Define o modelo da tabela tb_consultas
-Base = declarative_base()
 
 class Consulta(Base):
     __tablename__ = 'tb_consultas'
@@ -22,6 +19,14 @@ class Consulta(Base):
     cobertura_nuvem = Column(String, nullable=True)
     bbox = Column(JSON, nullable=True)  # Usando JSON para armazenar o array "bbox"
     bandas = Column(JSON, nullable=True)  # Usando JSON para armazenar o dicionário "bandas"
+
+    # 🆕 Novos campos para persistir resultados do processamento
+    ndvi_tif = Column(String, nullable=True)
+    ndvi_png = Column(String, nullable=True)
+    segmentado_tif = Column(String, nullable=True)
+    segmentado_png = Column(String, nullable=True)
+
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
 
 # Função assíncrona para criar a tabela
 async def create_tables():

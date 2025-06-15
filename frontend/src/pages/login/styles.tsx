@@ -171,3 +171,30 @@ export const InputSld = styled.div`
     }
   }
 `;
+
+export const Button = styled.button`
+  width: 30%;
+  border: none;
+  border-radius: 25px;
+  height: 36px;
+  font-size: 14px;
+  text-align: center;
+  justify-content: center;
+  background-color: #fe5000;
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background-color: #fe5000;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
