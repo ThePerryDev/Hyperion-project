@@ -2,83 +2,82 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import logging
+
+from app.core.database import engine, Base
+from app.core.security import hash_password
+from app.utils.cancel_instance import cancel_manager
+
+from app.controllers.usuario_controller import UsuarioController
+from app.schemas.tb_consulta import create_tables
+from app.models.usuario_model import Usuario
+
 from app.routes.api import router as api_router
-from app.routes import stac_routes
 from app.routes.usuario_route import router as usuario_router
 from app.routes.ml_routes import router as ml_router
 from app.routes.output_routes import router as output_router
-from app.core.database import engine, Base
-from app.controllers.usuario_controller import UsuarioController
-from app.schemas.tb_consulta import create_tables
-from app.models.usuario_model import Usuario  # 👈 garante que a tabela será criada
-import logging
+from app.routes.websocket_endpoint import router as websocket_router
+from app.routes.auth_routes import router as auth_router
+from app.routes import stac_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("🚀 Iniciando aplicação...")
 
-    # Etapa 1: Criar todas as tabelas
-    logging.info("🛠️ Criando tabelas...")
+    # 🛠️ Cria as tabelas principais
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # Etapa 2: Criar outras tabelas adicionais (como tb_consulta)
+    # 🔧 Cria outras tabelas específicas (como tb_consulta)
     await create_tables()
     logging.info("✅ Tabelas criadas com sucesso.")
 
-    # Etapa 3: Verificar se o admin já existe
+    # 🔐 Cria usuário admin se não existir
     try:
         usuario_controller = UsuarioController()
         usuarios = await usuario_controller.buscar_usuarios()
 
-        admin_existe = any(u.email == "admin" for u in usuarios)
-
-        if not admin_existe:
+        if not any(u.email == "admin" for u in usuarios):
             await usuario_controller.criar_usuario(
                 name="Administrador",
                 email="admin",
-                password="admin",  # ⚠️ usar apenas para ambiente de desenvolvimento
+                password=hash_password("admin"),
                 admin=True,
                 isLogged=False
             )
             logging.info("✅ Usuário admin criado com sucesso.")
         else:
             logging.info("ℹ️ Usuário admin já existe.")
-
     except Exception as e:
         logging.error(f"❌ Erro ao verificar/criar usuário admin: {e}")
 
-    yield  # A aplicação inicia aqui
+    yield  # 🚦 A aplicação está pronta para uso
 
     logging.info("🛑 Encerrando aplicação.")
 
-# FastAPI App
+# 🚀 Inicialização da aplicação FastAPI
 app = FastAPI(title="Monitoramento de Queimadas", lifespan=lifespan)
 
-# CORS
+# 🌐 Middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000"
-    ],
+
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Incluindo as rotas no aplicativo FastAPI
+# 📦 Rotas
 app.include_router(api_router)
-
-# Rota STAC
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(stac_routes.router, prefix="/stac")
-
-# Rota do usuário (API v1)
 app.include_router(usuario_router, prefix="/api/v1")
+app.include_router(ml_router, prefix="/api/v1")
+app.include_router(output_router, prefix="/api/v1")
+app.include_router(websocket_router)
 
-#Rota para /processar-imagem
-app.include_router(ml_router)
-
-#Rota para /processed-list e /bbox-from-tif
-app.include_router(output_router)
-
+# 🖼️ Rota de arquivos processados
 app.mount("/output", StaticFiles(directory="output"), name="output")
+
+__all__ = ["cancel_manager"]

@@ -390,10 +390,8 @@ export default function NavigationBar() {
             </CloseButton>
             <ScrollContainer>
               <h3>Localizar</h3>
-              <InputWrapper>
-                <SearchIcon src={searchIcon} alt="Buscar" />
-                <InputWithIcon type="text" placeholder="Buscar cidade" />
-              </InputWrapper>
+
+              <p> Clique em quatro pontos no mapa para criar um polígno de visualização.</p>
 
               {!selectingBBox && polygonPoints.length < 4 && (
                 <ButtonCustom
