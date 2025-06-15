@@ -165,26 +165,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`${API_URL}/delete/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao deletar usuário");
-      }
-
-      setRegisteredUsers(
-        registeredUsers.filter((u) => u.id !== id)
-      );
-      alert("Usuário deletado com sucesso!");
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao deletar usuário");
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -229,22 +209,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
             <Button onClick={onClose}>Fechar</Button>
           </div>
         </div>
-
-        {registeredUsers.length > 0 && (
-          <div>
-            <h3>Funcionários cadastrados:</h3>
-            {registeredUsers.map((u) => (
-              <UserCard key={u.id}>
-                <strong>{u.name}</strong> — {u.admin ? "Admin" : "Usuário"}
-                <br />
-                <small>{u.email}</small>
-                <Button onClick={() => handleDelete(u.id!)}>
-                  Deletar
-                </Button>
-              </UserCard>
-            ))}
-          </div>
-        )}
       </ModalContent>
     </ModalOverlay>
   );
