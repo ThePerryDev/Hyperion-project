@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import UserEditModal from "./UserEditModal";
-import { eyeOpenIcon, eyeCloseIcon } from "../../assets";
 
 interface Props {
   onClose: () => void;
@@ -12,7 +11,6 @@ interface User {
   name: string;
   email: string;
   admin: boolean;
-  senha: string;
 }
 
 const API_URL = "http://localhost:8000/api/v1/usuarios";
@@ -134,19 +132,39 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem("authToken");
+  
     try {
-      const res = await fetch(`${API_URL}/getall`);
+      const res = await fetch(`${API_URL}/getall`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!res.ok) throw new Error("Erro ao buscar usuários");
+  
       const data = await res.json();
       setUsers(data);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao buscar usuários", err);
       alert("Erro ao carregar usuários");
     }
   };
-
+  
   const handleDelete = async (id: number) => {
+    const confirm = window.confirm("Tem certeza que deseja excluir este usuário?");
+    if (!confirm) return;
+  
+    const token = localStorage.getItem("authToken");
+  
     try {
-      const res = await fetch(`${API_URL}/delete/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/delete/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (!res.ok) throw new Error();
       setUsers(users.filter((u) => u.id !== id));
       alert("Usuário excluído com sucesso!");
@@ -162,7 +180,7 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
   return (
     <ModalOverlay>
       <ModalContent>
-        <ButtonClose onClick={onClose}>×</ButtonClose>{" "}
+        <ButtonClose onClick={onClose}>×</ButtonClose>
         <Title>Lista de Funcionários</Title>
         {editingUser ? (
           <UserEditModal
@@ -174,30 +192,28 @@ const UserListModal: React.FC<Props> = ({ onClose }) => {
             }}
           />
         ) : (
-          <>
-            <UserListContainer>
-              {users.map((user) => (
-                <UserCard key={user.id}>
-                  <InfoGroup>
-                    <InfoText>
-                      <strong>Nome: {user.name}</strong> — Cargo:{" "}
-                      {user.admin ? "Admin" : "Usuário"}
-                    </InfoText>
-                    <InfoText>
-                      <small>Email: {user.email}</small>
-                    </InfoText>
-                  </InfoGroup>
+          <UserListContainer>
+            {users.map((user) => (
+              <UserCard key={user.id}>
+                <InfoGroup>
+                  <InfoText>
+                    <strong>Nome: {user.name}</strong> — Cargo:{" "}
+                    {user.admin ? "Admin" : "Usuário"}
+                  </InfoText>
+                  <InfoText>
+                    <small>Email: {user.email}</small>
+                  </InfoText>
+                </InfoGroup>
 
-                  <ButtonGroup>
-                    <Button onClick={() => setEditingUser(user)}>Editar</Button>
-                    <Button color="red" onClick={() => handleDelete(user.id!)}>
-                      Excluir
-                    </Button>
-                  </ButtonGroup>
-                </UserCard>
-              ))}
-            </UserListContainer>
-          </>
+                <ButtonGroup>
+                  <Button onClick={() => setEditingUser(user)}>Editar</Button>
+                  <Button color="red" onClick={() => handleDelete(user.id!)}>
+                    Excluir
+                  </Button>
+                </ButtonGroup>
+              </UserCard>
+            ))}
+          </UserListContainer>
         )}
       </ModalContent>
     </ModalOverlay>

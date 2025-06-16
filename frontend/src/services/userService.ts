@@ -11,33 +11,23 @@ class UsersService {
     name: string;
     email: string;
     password: string;
-    isLogged: boolean;
     admin: boolean;
   }): Promise<any> {
     const { data } = await api.post("/usuarios/post", props);
-    console.log(data)
     return data;
   }
 
-async put(props: {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  isLogged: boolean;
-  admin: boolean;
-}): Promise<any> {
-  const { id, ...rest } = props;
-  const { data } = await api.put(`/usuarios/put/${id}`, {
-    name: rest.name,
-    email: rest.email,
-    password: rest.password,
-    admin: rest.admin,
-    isLogged: rest.isLogged
-  });
-  return data;
-}
-
+  async put(props: {
+    id: string;
+    name: string;
+    email: string;
+    password?: string;
+    admin: boolean;
+  }): Promise<any> {
+    const { id, ...rest } = props;
+    const { data } = await api.put(`/usuarios/put/${id}`, rest);
+    return data;
+  }
 
   async listById(id: string) {
     const { data } = await api.get(`/usuarios/get/${id}`);
@@ -46,7 +36,7 @@ async put(props: {
 
   async delete(id: string) {
     const { data } = await api.delete(`/usuarios/delete/${id}`);
-    return data
+    return data;
   }
 }
 

@@ -4,7 +4,6 @@ import {
   opemMapIcon,
   openExportIcon,
   returnIcon,
-  searchIcon,
   settings,
   openSettingsIcon,
   overlayIcon,
@@ -26,6 +25,7 @@ import {
   ButtonLogout,
   CloseButton,
   FilterPanel,
+  FilterPanel2,
   InputCustom,
   InputCustom2,
   InputUser,
@@ -39,7 +39,6 @@ import {
 } from "./styles";
 import ExportData from "../ExportData/ExportData";
 import { ImagemProcessada } from "../ExportData/ExportData";
-
 
 export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
@@ -61,7 +60,6 @@ export default function NavigationBar() {
 
   const [processamentos, setProcessamentos] = useState<ImagemProcessada[]>([]);
 
-
   const handleLogout = () => {
     signout();
     navigate("/login");
@@ -81,41 +79,40 @@ export default function NavigationBar() {
   }, []);
 
   // Buscar processamentos feitos pelo usuário (protegido)
- useEffect(() => {
-  if (!token) return;
+  useEffect(() => {
+    if (!token) return;
 
-  axios
-    .get("http://localhost:8000/api/v1/meus-processamentos", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      const data = res.data.map((item: any) => ({
-        id: item.id_imagem,
-        bbox: item.bbox_real,
-        colecao: "CBERS 4A WFI", // Valor fixo, você pode alterar se precisar dinamicamente
-        data: item.data_processamento,
-        bandas: {
-          BAND13: item.banda13,
-          BAND14: item.banda14,
-          BAND15: item.banda15,
-          BAND16: item.banda16,
+    axios
+      .get("http://localhost:8000/api/v1/meus-processamentos", {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        cmask: item.cmask || undefined,
-        ndvi_tif: item.ndvi_tif,
-        ndvi_png: item.ndvi_png,
-        segmentado_tif: item.segmentado_tif,
-        segmentado_png: item.segmentado_png,
-      }));
+      })
+      .then((res) => {
+        const data = res.data.map((item: any) => ({
+          id: item.id_imagem,
+          bbox: item.bbox_real,
+          colecao: "CBERS 4A WFI", // Valor fixo, você pode alterar se precisar dinamicamente
+          data: item.data_processamento,
+          bandas: {
+            BAND13: item.banda13,
+            BAND14: item.banda14,
+            BAND15: item.banda15,
+            BAND16: item.banda16,
+          },
+          cmask: item.cmask || undefined,
+          ndvi_tif: item.ndvi_tif,
+          ndvi_png: item.ndvi_png,
+          segmentado_tif: item.segmentado_tif,
+          segmentado_png: item.segmentado_png,
+        }));
 
-      setProcessamentos(data);
-    })
-    .catch((err) => {
-      console.error("Erro ao buscar processamentos:", err);
-    });
-}, [showExport, token]);
-
+        setProcessamentos(data);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar processamentos:", err);
+      });
+  }, [showExport, token]);
 
   const aplicarFiltros = async () => {
     if (!bbox || !colecaoSelecionada || !dataInicio || !dataFim) {
@@ -150,29 +147,29 @@ export default function NavigationBar() {
   };
 
   const handleExport = async (id: string) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/baixar-processamento/${id}`,
-      {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/v1/baixar-processamento/${id}`,
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `${id}.zip`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (error) {
-    console.error("Erro ao exportar dados:", error);
-    alert("Erro ao exportar dados.");
-  }
-};
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${id}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Erro ao exportar dados:", error);
+      alert("Erro ao exportar dados.");
+    }
+  };
 
   return (
     <NavBar>
@@ -200,7 +197,10 @@ export default function NavigationBar() {
             </CloseButton>
             <ScrollContainer>
               <h3>Localizar</h3>
-              <p>Clique em quatro pontos no mapa para criar um polígono de visualização.</p>
+              <p>
+                Clique em quatro pontos no mapa para criar um polígono de
+                visualização.
+              </p>
 
               {!selectingBBox && polygonPoints.length < 4 && (
                 <ButtonCustom
@@ -215,10 +215,18 @@ export default function NavigationBar() {
 
               {bbox && (
                 <>
-                  <OptionDiv><InputCustom2 value={bbox[0]} readOnly /></OptionDiv>
-                  <OptionDiv><InputCustom2 value={bbox[1]} readOnly /></OptionDiv>
-                  <OptionDiv><InputCustom2 value={bbox[2]} readOnly /></OptionDiv>
-                  <OptionDiv><InputCustom2 value={bbox[3]} readOnly /></OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[0]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[1]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[2]} readOnly />
+                  </OptionDiv>
+                  <OptionDiv>
+                    <InputCustom2 value={bbox[3]} readOnly />
+                  </OptionDiv>
                 </>
               )}
 
@@ -228,9 +236,13 @@ export default function NavigationBar() {
                   value={colecaoSelecionada}
                   onChange={(e) => setColecaoSelecionada(e.target.value)}
                 >
-                  <option value="" disabled hidden>Selecione a Coleção</option>
+                  <option value="" disabled hidden>
+                    Selecione a Coleção
+                  </option>
                   {colecoes.map((colecaoId) => (
-                    <option key={colecaoId} value={colecaoId}>{colecaoId}</option>
+                    <option key={colecaoId} value={colecaoId}>
+                      {colecaoId}
+                    </option>
                   ))}
                 </SelectCustom>
               </OptionDiv>
@@ -253,17 +265,21 @@ export default function NavigationBar() {
                 />
               </OptionDiv>
             </ScrollContainer>
-            <ButtonCustom2 onClick={aplicarFiltros}>Aplicar Filtros</ButtonCustom2>
+            <ButtonCustom2 onClick={aplicarFiltros}>
+              Aplicar Filtros
+            </ButtonCustom2>
           </FilterPanel>
         ))}
 
       {showExport && (
-        <FilterPanel>
-    <ExportData imagens={processamentos} onExport={handleExport} />
-    <CloseButton onClick={() => setShowExport(false)}>
-      <img src={returnIcon} alt="Fechar" />
-    </CloseButton>
-  </FilterPanel>
+        <FilterPanel2>
+          <ScrollContainer>
+            <ExportData imagens={processamentos} onExport={handleExport} />
+            <CloseButton onClick={() => setShowExport(false)}>
+              <img src={returnIcon} alt="Fechar" />
+            </CloseButton>
+          </ScrollContainer>
+        </FilterPanel2>
       )}
 
       {showSettings && (
@@ -278,7 +294,10 @@ export default function NavigationBar() {
             </OptionDiv>
             <OptionDiv>
               <Options>Cargo</Options>
-              <InputUser value={user?.admin ? "administrador" : "usuário"} readOnly />
+              <InputUser
+                value={user?.admin ? "administrador" : "usuário"}
+                readOnly
+              />
             </OptionDiv>
             <OptionDiv>
               <Options>Email</Options>
@@ -286,10 +305,20 @@ export default function NavigationBar() {
             </OptionDiv>
             {user?.admin === true && (
               <>
-                <ButtonCustom onClick={() => setShowModal(true)}>Cadastrar Funcionários</ButtonCustom>
-                {showModal && <UserRegistrationModal onClose={() => setShowModal(false)} />}
-                <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>Editar Funcionários</ButtonCustom>
-                {showFuncionariosModal && <UserListModal onClose={() => setShowFuncionariosModal(false)} />}
+                <ButtonCustom onClick={() => setShowModal(true)}>
+                  Cadastrar Funcionários
+                </ButtonCustom>
+                {showModal && (
+                  <UserRegistrationModal onClose={() => setShowModal(false)} />
+                )}
+                <ButtonCustom onClick={() => setShowFuncionariosModal(true)}>
+                  Editar Funcionários
+                </ButtonCustom>
+                {showFuncionariosModal && (
+                  <UserListModal
+                    onClose={() => setShowFuncionariosModal(false)}
+                  />
+                )}
               </>
             )}
             <ButtonLogout onClick={handleLogout}>Logout</ButtonLogout>
@@ -343,7 +372,10 @@ export default function NavigationBar() {
             });
           }}
         >
-          <img src={showOverlayManual ? openOverlayIcon : overlayIcon} alt="Overlay Manual" />
+          <img
+            src={showOverlayManual ? openOverlayIcon : overlayIcon}
+            alt="Overlay Manual"
+          />
         </NavButton>
       </Top>
 
@@ -361,7 +393,10 @@ export default function NavigationBar() {
             });
           }}
         >
-          <img src={showSettings ? openSettingsIcon : settings} alt="Configurações" />
+          <img
+            src={showSettings ? openSettingsIcon : settings}
+            alt="Configurações"
+          />
         </NavButton>
       </Bottom>
     </NavBar>

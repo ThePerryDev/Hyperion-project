@@ -5,7 +5,7 @@ export const Panel = styled.div`
   top: 0;
   right: 100%;
   width: 400px;
-  max-height: 100%;
+  height: 100%;
   background-color: #f9f9f9;
   padding: 1rem;
   border-radius: 12px 0px 0px 12px;

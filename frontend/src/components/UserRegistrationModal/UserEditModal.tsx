@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import UserListModal from "./UserListModal"; // ajuste o caminho conforme necessário
 
 interface Props {
   user: User;
@@ -60,78 +59,80 @@ const UserEditModal: React.FC<Props> = ({ user, onCancel, onSaveSuccess }) => {
   const [admin, setAdmin] = useState(user.admin);
   const [password, setPassword] = useState("");
 
-  const [showFuncionariosModal, setShowFuncionariosModal] = useState(false);
-
   const handleEditSubmit = async () => {
-    setShowFuncionariosModal(true); // 👈 Vai para a "página" imediatamente
-    onCancel(); // Fecha o modal atual
-
     if (!user.id) return;
 
-    const payload = {
+    const token = localStorage.getItem("token");
+    const payload: any = {
       name,
       email,
       admin,
-      password,
     };
 
+    if (password) {
+      payload.password = password;
+    }
+
     try {
-      await fetch(`${API_URL}/put/${user.id}`, {
+      const response = await fetch(`${API_URL}/put/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
 
+      if (!response.ok) throw new Error("Erro ao atualizar");
+
       if (onSaveSuccess) onSaveSuccess();
-    } catch (_) {
-      // erro ignorado conforme solicitado
+    } catch (error) {
+      console.error("Erro ao editar usuário:", error);
+      alert("Erro ao atualizar usuário");
     }
   };
 
   return (
-    <>
-      <ModalContent>
-        <Title>Editar Usuário</Title>
-        <label>Nome:</label>
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <label>Email:</label>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <label>Senha (opcional):</label>
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <label>
-          <input
-            type="checkbox"
-            checked={admin}
-            onChange={(e) => setAdmin(e.target.checked)}
-          />
-          Admin
-        </label>
-        <div style={{ marginTop: "1rem" }}>
-          <Button onClick={handleEditSubmit}>Salvar</Button>
-          <Button color="#888" onClick={onCancel}>
-            Cancelar
-          </Button>
-        </div>
-      </ModalContent>
+    <ModalContent>
+      <Title>Editar Usuário</Title>
 
-      {showFuncionariosModal && (
-        <UserListModal onClose={() => setShowFuncionariosModal(false)} />
-      )}
-    </>
+      <label>Nome:</label>
+      <Input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <label>Email:</label>
+      <Input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <label>Senha (opcional):</label>
+      <Input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <label>
+        <input
+          type="checkbox"
+          checked={admin}
+          onChange={(e) => setAdmin(e.target.checked)}
+        />
+        Admin
+      </label>
+
+      <div style={{ marginTop: "1rem" }}>
+        <Button onClick={handleEditSubmit}>Salvar</Button>
+        <Button color="#888" onClick={onCancel}>
+          Cancelar
+        </Button>
+      </div>
+    </ModalContent>
   );
 };
 

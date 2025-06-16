@@ -110,7 +110,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
   useEffect(() => {
     const arquivo = arquivos.find((a) => `${a.id}_classes.tif` === tifSelecionado);
     if (arquivo) {
-      setBbox(arquivo.bbox_real.join(","));
+      setBbox(arquivo.bbox_real.map(coord => coord.toFixed(6)).join(","));
       setPngUrl(`http://localhost:8000${arquivo.preview_png}`);
     }
   }, [tifSelecionado, arquivos]);

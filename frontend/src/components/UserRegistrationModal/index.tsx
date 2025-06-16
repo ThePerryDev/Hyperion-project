@@ -6,15 +6,14 @@ interface Props {
 }
 
 interface User {
-  id?: number; // Adicionado para refletir o backend
+  id?: number;
   name: string;
   email: string;
   password: string;
   admin: boolean;
-  isLogged: false;
 }
 
-const API_URL = "http://localhost:8000/api/v1/usuarios"; // URL base do backend
+const API_URL = "http://localhost:8000/api/v1/usuarios";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -72,14 +71,6 @@ const Button = styled.button`
   }
 `;
 
-const UserCard = styled.div`
-  text-align: left;
-  background: #f3f3f3;
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-`;
-
 const Select = styled.select`
   width: 100%;
   padding: 0.75rem;
@@ -87,15 +78,6 @@ const Select = styled.select`
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
-  background-color: #fff;
-  appearance: none;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: #fe5000;
-    box-shadow: 0 0 0 2px rgba(254, 80, 0, 0.2);
-  }
 `;
 
 const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
@@ -104,7 +86,6 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     email: "",
     password: "",
     admin: false,
-    isLogged: false,
   });
 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
@@ -113,10 +94,9 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-
     setUser((prev) => ({
       ...prev,
-      [name]: name === "admin" ? value === "admin" : value,
+      [name]: name === "admin" ? value === "true" : value,
     }));
   };
 
@@ -126,13 +106,17 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
       return;
     }
 
+    const token = localStorage.getItem("authToken");
+    const { name, email, password, admin } = user;
+
     try {
       const response = await fetch(`${API_URL}/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify({ name, email, password, admin }),
       });
 
       if (!response.ok) {
@@ -142,8 +126,7 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
       const newUser = await response.json();
       setRegisteredUsers([...registeredUsers, newUser]);
       alert("Usuário cadastrado com sucesso!");
-      // Limpa os campos
-      setUser({ name: "", email: "", password: "", admin: false, isLogged: false });
+      setUser({ name: "", email: "", password: "", admin: false });
     } catch (error) {
       console.error(error);
       alert("Erro ao cadastrar usuário");
@@ -151,8 +134,15 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
   };
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem("authToken");
+
     try {
-      const response = await fetch(`${API_URL}/getall`);
+      const response = await fetch(`${API_URL}/getall`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       if (!response.ok) {
         throw new Error("Erro ao buscar usuários");
       }
@@ -172,42 +162,40 @@ const UserRegistrationModal: React.FC<Props> = ({ onClose }) => {
   return (
     <ModalOverlay>
       <ModalContent>
+        <h2>Cadastrar Funcionário</h2>
+        <Input
+          name="name"
+          placeholder="Nome"
+          value={user.name}
+          onChange={handleChange}
+        />
+        <Input
+          name="email"
+          placeholder="Email"
+          value={user.email}
+          onChange={handleChange}
+        />
+        <Input
+          name="password"
+          placeholder="Senha"
+          type="password"
+          value={user.password}
+          onChange={handleChange}
+        />
         <div>
-          <h2>Cadastrar Funcionário</h2>
-          <Input
-            name="name"
-            placeholder="Nome"
-            value={user.name}
+          <label>Função:</label>
+          <Select
+            name="admin"
+            value={user.admin.toString()}
             onChange={handleChange}
-          />
-          <Input
-            name="email"
-            placeholder="Email"
-            value={user.email}
-            onChange={handleChange}
-          />
-          <Input
-            name="password"
-            placeholder="Senha"
-            type="password"
-            value={user.password}
-            onChange={handleChange}
-          />
-          <div>
-            <label>Função:</label>
-            <Select
-              name="admin"
-              value={user.admin ? "admin" : "usuario"}
-              onChange={handleChange}
-            >
-              <option value="usuario">Usuário</option>
-              <option value="admin">Admin</option>
-            </Select>
-          </div>
-          <div>
-            <Button onClick={handleSubmit}>Cadastrar</Button>
-            <Button onClick={onClose}>Fechar</Button>
-          </div>
+          >
+            <option value="false">Usuário</option>
+            <option value="true">Admin</option>
+          </Select>
+        </div>
+        <div>
+          <Button onClick={handleSubmit}>Cadastrar</Button>
+          <Button onClick={onClose}>Fechar</Button>
         </div>
       </ModalContent>
     </ModalOverlay>
