@@ -1,5 +1,5 @@
 import { useBBox } from "../../context/BBoxContext";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import {
   Panel,
   Title,
@@ -12,6 +12,7 @@ import {
   ButtonVoltar,
 } from "./styles";
 import api from "../../services/api";
+import { AuthContext } from "../../context/AuthContext";
 
 interface ThumbnailViewerProps {
   imagens: {
@@ -64,6 +65,8 @@ export default function ThumbnailViewer({
   const socketRef = useRef<WebSocket | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  const { token } = useContext(AuthContext);
+
   useEffect(() => {
     return () => {
       clearInterval(intervaloTempoRef.current!);
@@ -91,6 +94,28 @@ export default function ThumbnailViewer({
     }
   };
 
+  // Declarar cancelarAmbos fora para uso em toda função
+  const cancelarAmbos = (id: string, cancelarBackend: boolean = true) => {
+    setCancelando(true);
+
+    if (cancelarBackend) {
+      api
+        .post(`/cancelar-processamento?id=${id}`)
+        .then(() => console.log("✅ Cancelamento backend enviado"))
+        .catch((e) => console.error("❌ Erro cancelando backend:", e));
+    }
+
+    abortRef.current?.abort();
+    setProcessingId(null);
+    setTempoEstimado(null);
+    setTempoEstimadoTotal(null);
+    clearInterval(intervaloTempoRef.current!);
+    clearInterval(pollingRef.current!);
+    socketRef.current?.close();
+    socketRef.current = null;
+    setCancelando(false);
+  };
+
   const handleProcessarImagem = async (img: any) => {
     if (processingId) return;
 
@@ -108,7 +133,7 @@ export default function ThumbnailViewer({
       cmask: "",
       thumbnail: img.thumbnail || "",
       bbox: img.bbox,
-      usuario_id: 1
+      usuario_id: 1,
     };
 
     console.log("🔍 Enviando payload:", payload);
@@ -148,13 +173,22 @@ export default function ThumbnailViewer({
       socketRef.current.onerror = (e) => console.error("WebSocket erro:", e);
       socketRef.current.onclose = () => console.log("WebSocket fechado.");
 
+      // Aqui incluí headers com token
       await api.post("/processar-imagem", payload, {
         signal: abortRef.current?.signal,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
+      // Polling para verificar status da imagem processada
       pollingRef.current = setInterval(async () => {
         try {
-          const res = await api.get("/processed-list/");
+          const res = await api.get("/processed-list/", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           const data = res.data;
           const encontrada = data.find((item: any) => item.id.includes(img.id));
           if (encontrada) {
@@ -181,34 +215,11 @@ export default function ThumbnailViewer({
     }
   };
 
-  const cancelarAmbos = (id: string, cancelarBackend: boolean = true) => {
-    setCancelando(true);
-
-    if (cancelarBackend) {
-      api
-        .post(`/cancelar-processamento?id=${id}`)
-        .then(() => console.log("✅ Cancelamento backend enviado"))
-        .catch((e) => console.error("❌ Erro cancelando backend:", e));
-    }
-
-    abortRef.current?.abort();
-    setProcessingId(null);
-    setTempoEstimado(null);
-    setTempoEstimadoTotal(null);
-    clearInterval(intervaloTempoRef.current!);
-    clearInterval(pollingRef.current!);
-    socketRef.current?.close();
-    socketRef.current = null;
-    setCancelando(false);
-  };
-
   return (
     <Panel>
       <ScrollContainer>
         <Title>Resultados da Busca</Title>
-        <ImageCountText>
-          {imagens.length} imagens foram encontradas
-        </ImageCountText>
+        <ImageCountText>{imagens.length} imagens foram encontradas</ImageCountText>
         {imagens.map((img) => {
           const isSelected = imagemThumbnail?.id === img.id;
           const estaProcessando = processingId === img.id;
@@ -245,25 +256,17 @@ export default function ThumbnailViewer({
                     {cancelando ? "Cancelando..." : "Cancelar Processamento"}
                   </SelectButton>
                   {tempoEstimado !== null && (
-                    <InfoText>
-                      Tempo decorrido: {formatarTempo(tempoEstimado)}
-                    </InfoText>
+                    <InfoText>Tempo decorrido: {formatarTempo(tempoEstimado)}</InfoText>
                   )}
                   {tempoEstimadoTotal !== null && (
                     <>
+                      <InfoText>Estimativa total: {formatarTempo(tempoEstimadoTotal)}</InfoText>
                       <InfoText>
-                        Estimativa total: {formatarTempo(tempoEstimadoTotal)}
-                      </InfoText>
-                      <InfoText>
-                        Tempo restante:{" "}
-                        {formatarTempo(tempoEstimadoTotal - tempoEstimado!)}
+                        Tempo restante: {formatarTempo(tempoEstimadoTotal - tempoEstimado!)}
                       </InfoText>
                       <InfoText>
                         Progresso:{" "}
-                        {((tempoEstimado! / tempoEstimadoTotal) * 100).toFixed(
-                          1
-                        )}
-                        %
+                        {((tempoEstimado! / tempoEstimadoTotal) * 100).toFixed(1)}%
                       </InfoText>
                     </>
                   )}

@@ -4,6 +4,7 @@ import { User } from "../types/User";
 // Correção no nome do tipo
 export type AuthContextType = {
     user: User | null;
+    token: string | null;
     signin: (email: string, password: string) => Promise<boolean>;
     signout: () => void;
 }

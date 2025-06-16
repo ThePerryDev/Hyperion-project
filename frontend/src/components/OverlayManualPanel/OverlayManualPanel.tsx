@@ -98,7 +98,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/processed-list/")
+      .get("http://localhost:8000/api/v1/processed-list/")
       .then((res) => {
         setArquivos(res.data || []);
       })

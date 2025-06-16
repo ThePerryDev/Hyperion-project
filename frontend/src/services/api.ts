@@ -4,10 +4,10 @@ const api: AxiosInstance = axios.create({
   baseURL: "http://127.0.0.1:8000/api/v1/",
 });
 
-// ✅ Injeta o token automaticamente em cada requisição
+// Injeta o token automaticamente em cada requisição
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
