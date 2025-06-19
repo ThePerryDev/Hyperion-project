@@ -40,6 +40,8 @@ import {
 import ExportData from "../ExportData/ExportData";
 import { ImagemProcessada } from "../ExportData/ExportData";
 
+const API = process.env.REACT_APP_API_URL;
+
 export default function NavigationBar() {
   const [showFilter, setShowFilter] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -65,10 +67,9 @@ export default function NavigationBar() {
     navigate("/login");
   };
 
-  // Buscar coleções suportadas (não precisa de token se for público)
   useEffect(() => {
     axios
-      .get("http://localhost:8000/colecoes-suportadas")
+      .get(`${API}/colecoes-suportadas`)
       .then((res) => {
         const nomes = res.data.map((colecao: { id: string }) => colecao.id);
         setColecoes(nomes);
@@ -78,12 +79,11 @@ export default function NavigationBar() {
       });
   }, []);
 
-  // Buscar processamentos feitos pelo usuário (protegido)
   useEffect(() => {
     if (!token) return;
 
     axios
-      .get("http://localhost:8000/api/v1/meus-processamentos", {
+      .get(`${API}/meus-processamentos`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,7 +92,7 @@ export default function NavigationBar() {
         const data = res.data.map((item: any) => ({
           id: item.id_imagem,
           bbox: item.bbox_real,
-          colecao: "CBERS 4A WFI", // Valor fixo, você pode alterar se precisar dinamicamente
+          colecao: "CBERS 4A WFI",
           data: item.data_processamento,
           bandas: {
             BAND13: item.banda13,
@@ -130,7 +130,7 @@ export default function NavigationBar() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/buscar-imagens",
+        `${API}/buscar-imagens`,
         payload,
         {
           headers: {
@@ -149,7 +149,7 @@ export default function NavigationBar() {
   const handleExport = async (id: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/v1/baixar-processamento/${id}`,
+        `${API}/baixar-processamento/${id}`,
         {
           responseType: "blob",
           headers: {

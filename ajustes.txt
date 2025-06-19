@@ -1,0 +1,4 @@
+Liberar Portas 3000 e 8000 no Azure e na VM
+baixar node.js, python, postgres, git, vscode.
+npm run build para testes e colocar os arquivos na pasta C:\inetpub\wwwroot
+alterar ip no .env.

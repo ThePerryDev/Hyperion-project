@@ -14,6 +14,9 @@ import {
 import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
 
+const API_BASE_HTTP = process.env.REACT_APP_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_WS = API_BASE_HTTP.replace(/^http/, "ws").replace("/api/v1", "");
+
 interface ThumbnailViewerProps {
   imagens: {
     id: string;
@@ -81,22 +84,22 @@ export default function ThumbnailViewer({ imagens, onClose }: ThumbnailViewerPro
       alert("Imagem sem BBOX disponível para visualização.");
     }
   };
-  
+
   const cancelarAmbos = async (id: string, cancelarBackend: boolean = true) => {
     setCancelando(true);
-  
+
     try {
       if (cancelarBackend) {
         await api.post(`/cancelar-processamento?id=${id}`);
         console.log("✅ Cancelamento backend confirmado");
       }
-  
+
       abortRef.current?.abort();
       socketRef.current?.close();
       socketRef.current = null;
       clearInterval(intervaloTempoRef.current!);
       clearInterval(pollingRef.current!);
-      
+
       setProcessingId(null);
       setTempoEstimado(null);
       setTempoEstimadoTotal(null);
@@ -141,7 +144,8 @@ export default function ThumbnailViewer({ imagens, onClose }: ThumbnailViewerPro
 
     abortRef.current = new AbortController();
 
-    socketRef.current = new WebSocket(`ws://localhost:8000/ws/${img.id}`);
+    const tokenParam = token ? `?token=${token}` : "";
+    socketRef.current = new WebSocket(`${API_BASE_WS!.replace(/^http/, "ws")}/ws/${img.id}${tokenParam}`);
 
     socketRef.current.onopen = async () => {
       console.log("🔗 WebSocket conectado para", img.id);
@@ -159,7 +163,7 @@ export default function ThumbnailViewer({ imagens, onClose }: ThumbnailViewerPro
             const data = res.data;
             const encontrada = data.find((item: any) => item.id.includes(img.id));
             if (encontrada) {
-              const imagemProcessadaUrl = `http://localhost:8000${encontrada.preview_png}`;
+              const imagemProcessadaUrl = `${API_BASE_HTTP}${encontrada.preview_png}`;
               setImagemProcessada({ id: img.id, thumbnail: imagemProcessadaUrl, bbox: img.bbox });
               setMostrarProcessada(true);
               cancelarAmbos(img.id, false);

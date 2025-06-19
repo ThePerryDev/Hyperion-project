@@ -26,10 +26,13 @@ export interface ExportDataProps {
   onExport: (id: string) => void;
 }
 
+const API_BASE = process.env.REACT_APP_API_URL || "";
+
 // 🔗 Função para forçar download
 const handleDownload = (url: string, filename: string) => {
+  const fullUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
   const link = document.createElement("a");
-  link.href = url;
+  link.href = fullUrl;
   link.setAttribute("download", filename);
   document.body.appendChild(link);
   link.click();
@@ -100,144 +103,74 @@ export default function ExportData({ imagens, onExport }: ExportDataProps) {
     <>
       {imagens.map((img) => (
         <Card key={img.id}>
-          <TextoInfo>
-            <strong>ID:</strong> {img.id}
-          </TextoInfo>
+          <TextoInfo><strong>ID:</strong> {img.id}</TextoInfo>
           {img.bbox && img.bbox.length === 4 && (
-            <TextoInfo>
-              <strong>BBOX:</strong> {img.bbox.join(", ")}
-            </TextoInfo>
+            <TextoInfo><strong>BBOX:</strong> {img.bbox.join(", ")}</TextoInfo>
           )}
           {img.colecao && (
-            <TextoInfo>
-              <strong>Coleção:</strong> {img.colecao}
-            </TextoInfo>
+            <TextoInfo><strong>Coleção:</strong> {img.colecao}</TextoInfo>
           )}
           {img.data && (
-            <TextoInfo>
-              <strong>Data:</strong> {new Date(img.data).toLocaleDateString()}
-            </TextoInfo>
+            <TextoInfo><strong>Data:</strong> {new Date(img.data).toLocaleDateString()}</TextoInfo>
           )}
 
           {img.bandas?.BAND13 && (
             <TextoInfo>
               Banda 13:
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.bandas!.BAND13!, `BAND13_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.bandas!.BAND13!, `BAND13_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.bandas?.BAND14 && (
             <TextoInfo>
               Banda 14:
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.bandas!.BAND14!, `BAND14_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.bandas!.BAND14!, `BAND14_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.bandas?.BAND15 && (
             <TextoInfo>
               Banda 15:
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.bandas!.BAND15!, `BAND15_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.bandas!.BAND15!, `BAND15_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.bandas?.BAND16 && (
             <TextoInfo>
               Banda 16:
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.bandas!.BAND16!, `BAND16_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.bandas!.BAND16!, `BAND16_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
 
           {img.cmask && (
             <TextoInfo>
               Máscara:
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.cmask!, `Mascara_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.cmask!, `Mascara_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.ndvi_tif && (
             <TextoInfo>
               NDVI (TIF):
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.ndvi_tif!, `NDVI_${img.id}.tif`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.ndvi_tif!, `NDVI_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.ndvi_png && (
             <TextoInfo>
               NDVI (PNG):
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(img.ndvi_png!, `NDVI_${img.id}.png`)
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.ndvi_png!, `NDVI_${img.id}.png`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.segmentado_tif && (
             <TextoInfo>
               Segmentado (TIF):
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(
-                    img.segmentado_tif!,
-                    `Segmentado_${img.id}.tif`
-                  )
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.segmentado_tif!, `Segmentado_${img.id}.tif`)}>Download</BotaoLink>
             </TextoInfo>
           )}
           {img.segmentado_png && (
             <TextoInfo>
               Segmentado (PNG):
-              <BotaoLink
-                onClick={() =>
-                  handleDownload(
-                    img.segmentado_png!,
-                    `Segmentado_${img.id}.png`
-                  )
-                }
-              >
-                Download
-              </BotaoLink>
+              <BotaoLink onClick={() => handleDownload(img.segmentado_png!, `Segmentado_${img.id}.png`)}>Download</BotaoLink>
             </TextoInfo>
           )}
 
-          <BotaoExportar onClick={() => onExport(img.id)}>
-            Exportar dados
-          </BotaoExportar>
+          <BotaoExportar onClick={() => onExport(img.id)}>Exportar dados</BotaoExportar>
         </Card>
       ))}
     </>

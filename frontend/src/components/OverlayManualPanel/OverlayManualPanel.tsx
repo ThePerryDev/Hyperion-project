@@ -86,6 +86,8 @@ interface Props {
   onClose: () => void;
 }
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 export default function OverlayManualPanel({ onClose }: Props) {
   const { setImagemProcessada, setMostrarProcessada } = useBBox();
 
@@ -98,7 +100,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/v1/processed-list/")
+      .get(`${API_URL}/processed-list/`)
       .then((res) => {
         setArquivos(res.data || []);
       })
@@ -111,7 +113,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
     const arquivo = arquivos.find((a) => `${a.id}_classes.tif` === tifSelecionado);
     if (arquivo) {
       setBbox(arquivo.bbox_real.map(coord => coord.toFixed(6)).join(","));
-      setPngUrl(`http://localhost:8000${arquivo.preview_png}`);
+      setPngUrl(`${API_URL}${arquivo.preview_png}`);
     }
   }, [tifSelecionado, arquivos]);
 

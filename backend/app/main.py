@@ -12,6 +12,7 @@ from app.controllers.usuario_controller import UsuarioController
 from app.schemas.tb_consulta import create_tables
 from app.models.usuario_model import Usuario
 
+# Importação das rotas
 from app.routes.api import router as api_router
 from app.routes.usuario_route import router as usuario_router
 from app.routes.ml_routes import router as ml_router
@@ -24,15 +25,14 @@ from app.routes import stac_routes
 async def lifespan(app: FastAPI):
     logging.info("🚀 Iniciando aplicação...")
 
-    # 🛠️ Cria as tabelas principais
+    # Cria as tabelas
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # 🔧 Cria outras tabelas específicas (como tb_consulta)
     await create_tables()
     logging.info("✅ Tabelas criadas com sucesso.")
 
-    # 🔐 Cria usuário admin se não existir
+    # Criação do admin
     try:
         usuario_controller = UsuarioController()
         usuarios = await usuario_controller.buscar_usuarios()
@@ -49,35 +49,33 @@ async def lifespan(app: FastAPI):
         else:
             logging.info("ℹ️ Usuário admin já existe.")
     except Exception as e:
-        logging.error(f"❌ Erro ao verificar/criar usuário admin: {e}")
+        logging.error(f"❌ Erro ao criar/verificar usuário admin: {e}")
 
-    yield  # 🚦 A aplicação está pronta para uso
-
+    yield
     logging.info("🛑 Encerrando aplicação.")
 
-# 🚀 Inicialização da aplicação FastAPI
+# Inicializa FastAPI com o ciclo de vida
 app = FastAPI(title="Monitoramento de Queimadas", lifespan=lifespan)
 
-# 🌐 Middleware CORS
+# Middleware CORS
 app.add_middleware(
     CORSMiddleware,
-
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 📦 Rotas
-app.include_router(api_router)
+# Monta arquivos estáticos
+app.mount("/output", StaticFiles(directory="output"), name="output")
+
+# Registro de rotas (todas sob `/api/v1`)
 app.include_router(auth_router, prefix="/api/v1")
-app.include_router(stac_routes.router, prefix="/stac")
 app.include_router(usuario_router, prefix="/api/v1")
 app.include_router(ml_router, prefix="/api/v1")
 app.include_router(output_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api/v1")
+app.include_router(stac_routes.router, prefix="/api/v1/stac")  
 app.include_router(websocket_router)
-
-# 🖼️ Rota de arquivos processados
-app.mount("/output", StaticFiles(directory="output"), name="output")
 
 __all__ = ["cancel_manager"]

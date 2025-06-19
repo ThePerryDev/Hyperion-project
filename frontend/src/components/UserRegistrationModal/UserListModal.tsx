@@ -13,7 +13,7 @@ interface User {
   admin: boolean;
 }
 
-const API_URL = "http://localhost:8000/api/v1/usuarios";
+const API_URL = `${process.env.REACT_APP_API_URL}/usuarios`;
 
 const ModalOverlay = styled.div`
   position: fixed;
