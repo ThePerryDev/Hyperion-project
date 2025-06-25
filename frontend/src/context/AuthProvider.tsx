@@ -31,11 +31,25 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
 const signin = async (email: string, password: string) => {
+  console.log("ReactNativeWebView disponível?", !!window.ReactNativeWebView);
   const userData = await api.signin(email, password);
   const storedToken = localStorage.getItem("authToken"); // token já salvo dentro do signin
   if (userData && storedToken) {
     setUser(userData);
     setToken(storedToken);
+    console.log("Enviando token para o app nativo...");
+    // Envia para WebView (se estiver rodando dentro do app)
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: "SET_TOKEN",
+        token: storedToken,
+        userId: userData.id
+      }));
+      console.log("✅ Token enviado para WebView");
+    } else {
+      console.warn("⚠️ ReactNativeWebView não está disponível — usando navegador?");
+    }
+
     return true;
   }
   return false;

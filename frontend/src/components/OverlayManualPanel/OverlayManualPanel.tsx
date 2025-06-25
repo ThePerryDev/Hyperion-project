@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useBBox } from "../../context/BBoxContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const Panel = styled.div`
   position: absolute;
@@ -95,6 +96,7 @@ export default function OverlayManualPanel({ onClose }: Props) {
   const [tifSelecionado, setTifSelecionado] = useState("");
   const [bbox, setBbox] = useState("");
   const [pngUrl, setPngUrl] = useState("");
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     axios
@@ -108,9 +110,11 @@ export default function OverlayManualPanel({ onClose }: Props) {
   }, []);
 
   useEffect(() => {
-    const arquivo = arquivos.find((a) => `${a.id}_classes.tif` === tifSelecionado);
+    const arquivo = arquivos.find(
+      (a) => `${a.id}_classes.tif` === tifSelecionado
+    );
     if (arquivo) {
-      setBbox(arquivo.bbox_real.map(coord => coord.toFixed(6)).join(","));
+      setBbox(arquivo.bbox_real.map((coord) => coord.toFixed(6)).join(","));
       setPngUrl(`http://localhost:8000${arquivo.preview_png}`);
     }
   }, [tifSelecionado, arquivos]);
@@ -133,6 +137,31 @@ export default function OverlayManualPanel({ onClose }: Props) {
 
   const handleOcultar = () => {
     setMostrarProcessada(false);
+  };
+
+  const handleValidarProcessamentos = async () => {
+    try {
+      if (!token) {
+        alert("Token de autenticação não encontrado.");
+        return;
+      }
+
+      const res = await axios.post(
+        "http://localhost:8000/api/v1/validar-meus-processamentos",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Processamentos validados com sucesso!");
+      console.log("✅", res.data);
+    } catch (error) {
+      alert("Erro ao validar processamentos.");
+      console.error("❌ Erro:", error);
+    }
   };
 
   return (
@@ -167,6 +196,9 @@ export default function OverlayManualPanel({ onClose }: Props) {
 
       <Button onClick={handleMostrar}>Mostrar Overlay</Button>
       <Button onClick={handleOcultar}>Ocultar Overlay</Button>
+      <Button onClick={handleValidarProcessamentos}>
+        Validar Meus Processamentos
+      </Button>
       <Button onClick={onClose}>Voltar</Button>
     </Panel>
   );

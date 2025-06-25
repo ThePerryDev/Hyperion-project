@@ -16,6 +16,7 @@ export default function Login() {
     if (email && password) {
       const user = await auth.signin(email, password);
       if (user) {
+        window.ReactNativeWebView?.postMessage("LOGIN_OK");
         navigate("/");
       } else {
         alert("Falha ao logar");
